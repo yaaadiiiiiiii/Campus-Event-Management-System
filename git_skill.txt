@@ -1,0 +1,13 @@
+身分登入：
+$ git config --global user.name "名字"
+$ git config --global user.email 信箱
+
+PUSH：
+$ git init
+$ code .
+$ git clone https://github.com/yaaadiiiiiiii/SA.git
+$ git remote add origin https://github.com/yaaadiiiiiiii/Campus-Event-Management-System.git
+$ git pull origin master
+$ git push -u origin master
+$ git pull origin master --rebase -->傳不上去的話打這個
+---完成---
