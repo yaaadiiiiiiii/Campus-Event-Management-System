@@ -19,17 +19,34 @@
                 <Cursor fx:constant="DEFAULT" />
             </cursor>
         </Label>
+<<<<<<< HEAD
         <TextField fx:id="searchField" layoutX="479.0" layoutY="79.0" promptText="搜尋活動..." />
         <Button fx:id="searchButton" layoutX="664.0" layoutY="79.0" mnemonicParsing="false" onAction="#handleSearch" text="搜尋" />
+=======
+        <TextField fx:id="searchField" layoutX="330.0" layoutY="77.0" promptText="搜尋活動..." />
+        <Button fx:id="searchButton" layoutX="515.0" layoutY="77.0" mnemonicParsing="false" onAction="#handleSearch" text="搜尋" />
+        <Button fx:id="backButton" layoutX="538.0" layoutY="345.0" mnemonicParsing="false" onAction="#handleBackToMain" text="返回" />
+
+>>>>>>> 87eb0eef5180199ab693f2301720d36c2a486dbf
 
         <TableView fx:id="eventTable" layoutX="39.0" layoutY="112.0" prefHeight="366.0" prefWidth="665.0">
             <columns>
+<<<<<<< HEAD
                 <TableColumn fx:id="eventNameColumn" prefWidth="112.0" text="活動名稱" />
                 <TableColumn fx:id="locationColumn" prefWidth="103.0" text="地點" />
                 <TableColumn fx:id="timeColumn" prefWidth="102.0" text="時間" />
                 <TableColumn fx:id="organizerColumn" prefWidth="120.0" text="主辦單位" />
                 <TableColumn fx:id="capacityColumn" prefWidth="71.0" text="名額" />
                 <TableColumn fx:id="actionColumn" prefWidth="156.0" text="報名" />
+=======
+                <TableColumn fx:id="eventNameColumn" prefWidth="90.0" text="活動名稱" />
+                <TableColumn fx:id="locationColumn" prefWidth="80.0" text="地點" />
+                <TableColumn fx:id="timeColumn" prefWidth="100.0" text="時間" />
+                <TableColumn fx:id="organizerColumn" prefWidth="80.0" text="主辦單位" />
+                <TableColumn fx:id="capacityColumn" prefWidth="60.0" text="名額" />
+                <TableColumn fx:id="actionColumn" prefWidth="40.0" text="報名" />
+
+>>>>>>> 87eb0eef5180199ab693f2301720d36c2a486dbf
             </columns>
         </TableView>
 

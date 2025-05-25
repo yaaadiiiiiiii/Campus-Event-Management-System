@@ -27,6 +27,7 @@ public class EventBrowserController implements Initializable {
     @FXML private TableColumn<Event, String> organizerColumn;
     @FXML private TableColumn<Event, Integer> capacityColumn;
     @FXML private TableColumn<Event, Void> actionColumn;
+    @FXML private Button backButton;
 
     private ObservableList<Event> eventList = FXCollections.observableArrayList();
     private ObservableList<Event> filteredEventList = FXCollections.observableArrayList();
