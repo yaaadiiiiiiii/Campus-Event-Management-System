@@ -37,7 +37,7 @@ public class login {
 
             if (userRole.equals("h")) {
                 welcomeMessage = "歡迎主辦人使用系統！";
-                nextPage = "/login.fxml"; // 主辦人介面
+                nextPage = "/主辦人主畫面.fxml"; // 主辦人介面
             } else {
                 welcomeMessage = "歡迎學生使用系統！";
                 nextPage = "/學生主畫面.fxml"; // 學生介面

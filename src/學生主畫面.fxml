@@ -6,19 +6,19 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="860.0" prefWidth="1500.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
    <children>
-      <Button layoutX="691.0" layoutY="346.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="119.0" text="瀏覽活動">
+      <Button layoutX="241.0" layoutY="141.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="119.0" text="瀏覽活動">
          <font>
             <Font size="20.0" />
          </font></Button>
-      <Button layoutX="691.0" layoutY="430.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="119.0" text="報名紀錄">
+      <Button layoutX="241.0" layoutY="218.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="119.0" text="報名活動">
          <font>
             <Font size="20.0" />
          </font></Button>
-      <Label layoutX="370.0" layoutY="214.0" text="Campus Event Management System" textOverrun="CLIP">
+      <Label layoutX="98.0" layoutY="53.0" text="Campus Event Management System" textOverrun="CLIP">
          <font>
-            <Font size="45.0" />
+            <Font size="24.0" />
          </font>
          <cursor>
             <Cursor fx:constant="W_RESIZE" />

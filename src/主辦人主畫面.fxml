@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" prefWidth="700.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="HostMainController">
+   <children>
+      <!-- 標題 -->
+      <Label layoutX="200.0" layoutY="50.0" text="主辦人管理系統" textAlignment="CENTER">
+         <font>
+            <Font size="28.0" />
+         </font>
+      </Label>
+
+      <!-- 歡迎訊息 -->
+      <Label layoutX="250.0" layoutY="100.0" text="歡迎使用校園活動管理系統" textAlignment="CENTER">
+         <font>
+            <Font size="16.0" />
+         </font>
+      </Label>
+
+      <!-- 功能按鈕區域 -->
+      <VBox layoutX="250.0" layoutY="180.0" spacing="20.0" prefWidth="200.0">
+         <children>
+            <!-- 活動管理按鈕 -->
+            <Button fx:id="eventManagementButton" onAction="#handleEventManagement"
+                    prefHeight="50.0" prefWidth="200.0" text="活動管理"
+                    style="-fx-background-color: #2196F3; -fx-text-fill: white; -fx-font-size: 16px;">
+            </Button>
+
+            <!-- 報名管理按鈕 -->
+            <Button prefHeight="50.0" prefWidth="200.0" text="報名管理"
+                    style="-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-size: 16px;">
+            </Button>
+
+            <!-- 統計報表按鈕 -->
+            <Button prefHeight="50.0" prefWidth="200.0" text="統計報表"
+                    style="-fx-background-color: #FF9800; -fx-text-fill: white; -fx-font-size: 16px;">
+            </Button>
+
+            <!-- 登出按鈕 -->
+            <Button fx:id="logoutButton" onAction="#handleLogout"
+                    prefHeight="50.0" prefWidth="200.0" text="登出"
+                    style="-fx-background-color: #f44336; -fx-text-fill: white; -fx-font-size: 16px;">
+            </Button>
+         </children>
+      </VBox>
+
+      <!-- 版權資訊 -->
+      <Label layoutX="250.0" layoutY="450.0" text="© 2025 校園活動管理系統" textAlignment="CENTER">
+         <font>
+            <Font size="12.0" />
+         </font>
+      </Label>
+   </children>
+</AnchorPane>

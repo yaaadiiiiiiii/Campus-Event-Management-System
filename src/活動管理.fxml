@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="EventController">
+    <children>
+        <Label layoutX="250.0" layoutY="20.0" text="Campus Event Management System" textAlignment="CENTER">
+            <font>
+                <Font size="24.0" />
+            </font>
+        </Label>
+
+        <!-- 操作按鈕區域 -->
+        <HBox layoutX="50.0" layoutY="60.0" spacing="10.0">
+            <children>
+                <Button fx:id="addButton" onAction="#handleAddEvent" prefHeight="30.0" prefWidth="80.0" text="新增活動" />
+                <Button fx:id="refreshButton" onAction="#handleRefresh" prefHeight="30.0" prefWidth="80.0" text="重新整理" />
+                <Button fx:id="backButton" onAction="#handleBackToMain" prefHeight="30.0" prefWidth="80.0" text="返回主畫面"
+                        style="-fx-background-color: #9E9E9E; -fx-text-fill: white;" />
+            </children>
+        </HBox>
+
+        <!-- 活動列表表格 -->
+        <TableView fx:id="eventTable" layoutX="50.0" layoutY="100.0" prefHeight="350.0" prefWidth="700.0">
+            <columns>
+                <TableColumn fx:id="titleColumn" prefWidth="120.0" text="標題" />
+                <TableColumn fx:id="locationColumn" prefWidth="100.0" text="地點" />
+                <TableColumn fx:id="timeColumn" prefWidth="120.0" text="時間" />
+                <TableColumn fx:id="organizerColumn" prefWidth="120.0" text="主辦單位" />
+                <TableColumn fx:id="capacityColumn" prefWidth="80.0" text="名額" />
+                <TableColumn fx:id="actionColumn" prefWidth="160.0" text="操作" />
+            </columns>
+        </TableView>
+    </children>
+</AnchorPane>
