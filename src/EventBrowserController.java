@@ -1,3 +1,4 @@
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -46,12 +47,12 @@ public class EventBrowserController implements Initializable {
         organizerColumn.setCellValueFactory(new PropertyValueFactory<>("organizer"));
         capacityColumn.setCellValueFactory(new PropertyValueFactory<>("remainingCapacity"));
 
-        // 設置報名按鈕欄位
+        // 報名按鈕欄位
         actionColumn.setCellFactory(new Callback<TableColumn<Event, Void>, TableCell<Event, Void>>() {
             @Override
             public TableCell<Event, Void> call(TableColumn<Event, Void> param) {
                 return new TableCell<Event, Void>() {
-                    private final Button registerButton = new Button("報名");
+                    private final Button registerButton = new Button();
 
                     {
                         registerButton.setOnAction(event -> {
@@ -69,6 +70,10 @@ public class EventBrowserController implements Initializable {
                             Event event = getTableView().getItems().get(getIndex());
                             if (event.getRemainingCapacity() <= 0) {
                                 registerButton.setText("已額滿");
+                                registerButton.setDisable(true);
+                                registerButton.setStyle("-fx-background-color: #cccccc;");
+                            } else if (event.isRegistered()) {
+                                registerButton.setText("已報名");
                                 registerButton.setDisable(true);
                                 registerButton.setStyle("-fx-background-color: #cccccc;");
                             } else {
@@ -136,11 +141,9 @@ public class EventBrowserController implements Initializable {
     }
 
     private void handleRegistration(Event event) {
-        if (event.getRemainingCapacity() > 0) {
-            // 報名成功，減少剩餘名額
+        if (event.getRemainingCapacity() > 0 && !event.isRegistered()) {
             event.setRemainingCapacity(event.getRemainingCapacity() - 1);
-
-            // 刷新表格
+            event.setRegistered(true); // 標記已報名
             eventTable.refresh();
 
             // 顯示成功訊息
@@ -149,6 +152,13 @@ public class EventBrowserController implements Initializable {
             alert.setHeaderText(null);
             alert.setContentText("恭喜！您已成功報名「" + event.getEventName() + "」活動。\n" +
                     "剩餘名額：" + event.getRemainingCapacity());
+            alert.showAndWait();
+        } else if (event.isRegistered()) {
+            // 已經報名過了
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("重複報名");
+            alert.setHeaderText(null);
+            alert.setContentText("您已經報名過「" + event.getEventName() + "」活動，請勿重複報名！");
             alert.showAndWait();
         } else {
             // 顯示額滿訊息
@@ -167,6 +177,7 @@ public class EventBrowserController implements Initializable {
         private final SimpleStringProperty time;
         private final SimpleStringProperty organizer;
         private final SimpleIntegerProperty remainingCapacity;
+        private final SimpleBooleanProperty registered = new SimpleBooleanProperty(false);
 
         public Event(String eventName, String location, String time, String organizer, int remainingCapacity) {
             this.eventName = new SimpleStringProperty(eventName);
@@ -182,6 +193,7 @@ public class EventBrowserController implements Initializable {
         public String getTime() { return time.get(); }
         public String getOrganizer() { return organizer.get(); }
         public int getRemainingCapacity() { return remainingCapacity.get(); }
+        public boolean isRegistered() { return registered.get(); }
 
         // Setter methods
         public void setEventName(String eventName) { this.eventName.set(eventName); }
@@ -189,6 +201,7 @@ public class EventBrowserController implements Initializable {
         public void setTime(String time) { this.time.set(time); }
         public void setOrganizer(String organizer) { this.organizer.set(organizer); }
         public void setRemainingCapacity(int remainingCapacity) { this.remainingCapacity.set(remainingCapacity); }
+        public void setRegistered(boolean value) { this.registered.set(value); }
 
         // Property methods for TableView binding
         public SimpleStringProperty eventNameProperty() { return eventName; }
@@ -196,5 +209,6 @@ public class EventBrowserController implements Initializable {
         public SimpleStringProperty timeProperty() { return time; }
         public SimpleStringProperty organizerProperty() { return organizer; }
         public SimpleIntegerProperty remainingCapacityProperty() { return remainingCapacity; }
+        public SimpleBooleanProperty registeredProperty() { return registered; }
     }
 }
