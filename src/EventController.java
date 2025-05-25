@@ -12,7 +12,7 @@ import javafx.stage.Stage;
 import javafx.util.Callback;
 import model.Event;
 
-import java.io.IOException;
+import java.io.*;
 import java.net.URL;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -32,20 +32,17 @@ public class EventController implements Initializable {
 
     private ObservableList<Event> eventList = FXCollections.observableArrayList();
 
+    private final String csvPath = "活動列表.csv"; // 檔案名可根據需要更換
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        // 設定表格欄位與資料的對應
         titleColumn.setCellValueFactory(new PropertyValueFactory<>("title"));
         locationColumn.setCellValueFactory(new PropertyValueFactory<>("location"));
         timeColumn.setCellValueFactory(new PropertyValueFactory<>("time"));
         organizerColumn.setCellValueFactory(new PropertyValueFactory<>("organizer"));
         capacityColumn.setCellValueFactory(new PropertyValueFactory<>("capacity"));
-
-        // 設定操作欄位的按鈕
         setupActionColumn();
-
-        // 載入初始資料
-        loadSampleData();
+        loadEventsFromCSV(csvPath);
         eventTable.setItems(eventList);
     }
 
@@ -54,19 +51,17 @@ public class EventController implements Initializable {
                 new Callback<TableColumn<Event, Void>, TableCell<Event, Void>>() {
                     @Override
                     public TableCell<Event, Void> call(final TableColumn<Event, Void> param) {
-                        final TableCell<Event, Void> cell = new TableCell<Event, Void>() {
+                        return new TableCell<Event, Void>() {
 
                             private final Button editBtn = new Button("編輯");
                             private final Button deleteBtn = new Button("刪除");
                             private final HBox hbox = new HBox(editBtn, deleteBtn);
 
                             {
-                                // 設定按鈕樣式
                                 editBtn.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white;");
                                 deleteBtn.setStyle("-fx-background-color: #f44336; -fx-text-fill: white;");
                                 hbox.setSpacing(5);
 
-                                // 設定按鈕事件
                                 editBtn.setOnAction(event -> {
                                     Event selectedEvent = getTableView().getItems().get(getIndex());
                                     handleEditEvent(selectedEvent);
@@ -88,7 +83,6 @@ public class EventController implements Initializable {
                                 }
                             }
                         };
-                        return cell;
                     }
                 };
 
@@ -102,6 +96,7 @@ public class EventController implements Initializable {
 
         result.ifPresent(event -> {
             eventList.add(event);
+            saveEventsToCSV(csvPath);
             showAlert("成功", "活動已成功新增！", Alert.AlertType.INFORMATION);
         });
     }
@@ -111,15 +106,13 @@ public class EventController implements Initializable {
         Optional<Event> result = dialog.showAndWait();
 
         result.ifPresent(updatedEvent -> {
-            // 更新原有活動的資料
             event.setTitle(updatedEvent.getTitle());
             event.setLocation(updatedEvent.getLocation());
             event.setTime(updatedEvent.getTime());
-            event.setOrganizer(updatedEvent.getOrganizer());
+            event.setOrganizer(updatedEvent.getOrganizer().getId());
             event.setCapacity(updatedEvent.getCapacity());
-
-            // 重新整理表格
             eventTable.refresh();
+            saveEventsToCSV(csvPath);
             showAlert("成功", "活動已成功更新！", Alert.AlertType.INFORMATION);
         });
     }
@@ -133,12 +126,14 @@ public class EventController implements Initializable {
         Optional<ButtonType> result = alert.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
             eventList.remove(event);
+            saveEventsToCSV(csvPath);
             showAlert("成功", "活動已成功刪除！", Alert.AlertType.INFORMATION);
         }
     }
 
     @FXML
     private void handleRefresh() {
+        loadEventsFromCSV(csvPath);
         eventTable.refresh();
         showAlert("完成", "資料已重新整理！", Alert.AlertType.INFORMATION);
     }
@@ -146,7 +141,6 @@ public class EventController implements Initializable {
     @FXML
     private void handleBackToMain() {
         try {
-            // 回到主辦人主畫面
             Parent root = FXMLLoader.load(getClass().getResource("/主辦人主畫面.fxml"));
             Stage stage = (Stage) backButton.getScene().getWindow();
             stage.setScene(new Scene(root));
@@ -159,13 +153,47 @@ public class EventController implements Initializable {
         }
     }
 
-    private void loadSampleData() {
-        // 載入一些範例資料
-        eventList.addAll(
-                new Event("程式設計競賽", "電算中心", "2025-06-01 09:00", "資訊系", 50),
-                new Event("音樂會", "大禮堂", "2025-06-15 19:00", "音樂系", 200),
-                new Event("學術研討會", "國際會議廳", "2025-06-20 13:30", "研發處", 100)
-        );
+    /*** CSV 載入與存檔邏輯 ***/
+    private void loadEventsFromCSV(String path) {
+        eventList.clear();
+        File file = new File(path);
+        if (!file.exists()) return;
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"))) {
+            String line;
+            boolean firstLine = true;
+            while ((line = br.readLine()) != null) {
+                if (firstLine) { firstLine = false; continue; } // 跳過標題
+                String[] tokens = line.split(",", -1);
+                if (tokens.length >= 5) {
+                    String title = tokens[0];
+                    String location = tokens[1];
+                    String time = tokens[2];
+                    String organizer = tokens[3];
+                    int capacity = Integer.parseInt(tokens[4]);
+                    eventList.add(new Event(title, location, time, organizer, capacity));
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert("錯誤", "無法讀取活動列表！", Alert.AlertType.ERROR);
+        }
+    }
+
+    private void saveEventsToCSV(String path) {
+        try (BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(path), "UTF-8"))) {
+            bw.write("標題,地點,時間,主辦單位,名額");
+            bw.newLine();
+            for (Event event : eventList) {
+                String line = String.format("%s,%s,%s,%s,%d",
+                        event.getTitle(), event.getLocation(), event.getTime(),
+                        event.getOrganizer(), event.getCapacity());
+                bw.write(line);
+                bw.newLine();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert("錯誤", "無法儲存活動列表！", Alert.AlertType.ERROR);
+        }
     }
 
     private void showAlert(String title, String message, Alert.AlertType type) {
