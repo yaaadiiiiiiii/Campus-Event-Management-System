@@ -316,6 +316,7 @@ public class EventBrowserController implements Initializable {
         public String getTime() { return time.get(); }
         public String getOrganizer() { return organizer.get(); }
         public int getRemainingCapacity() { return remainingCapacity.get(); }
+        public boolean isRegistered() { return registered.get(); }
 
         // Setter methods
         public void setRemainingCapacity(int remainingCapacity) { this.remainingCapacity.set(remainingCapacity); }
