@@ -126,7 +126,7 @@ public class EventBrowserController implements Initializable {
             // 返回學生主畫面
             Parent root = FXMLLoader.load(getClass().getResource("/學生主畫面.fxml"));
             Stage stage = (Stage) searchField.getScene().getWindow();
-            stage.setScene(new Scene(root, 600, 400));
+            stage.setScene(new Scene(root, 800, 500));
             stage.setTitle("學生系統");
             stage.show();
         } catch (IOException e) {

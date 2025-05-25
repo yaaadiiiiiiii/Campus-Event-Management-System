@@ -20,6 +20,8 @@ public class StudentMainController implements Initializable {
     @FXML
     private Button registerEventsButton;
 
+    @FXML private Button logoutButton;           // 登出按鈕
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         // 初始化方法，可以在此處設置初始狀態
@@ -32,18 +34,14 @@ public class StudentMainController implements Initializable {
     @FXML
     private void handleBrowseEvents(ActionEvent event) {
         try {
-            // 載入瀏覽活動頁面
             FXMLLoader loader = new FXMLLoader(getClass().getResource("活動瀏覽.fxml"));
             Parent root = loader.load();
 
-            // 獲取當前視窗
             Stage stage = (Stage) browseEventsButton.getScene().getWindow();
 
-            // 設置新場景
-            Scene scene = new Scene(root);
+            Scene scene = new Scene(root, 800, 500);
             stage.setScene(scene);
             stage.setTitle("瀏覽活動");
-            stage.show();
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -73,6 +71,28 @@ public class StudentMainController implements Initializable {
         } catch (IOException e) {
             e.printStackTrace();
             showErrorAlert("錯誤", "無法載入報名活動頁面", e.getMessage());
+        }
+    }
+
+    /**
+     * 處理登出按鈕點擊事件
+     */
+    @FXML
+    private void handleLogout() {
+        try {
+            // 回到登入畫面
+            Parent root = FXMLLoader.load(getClass().getResource("/login.fxml"));
+            Stage stage = (Stage) logoutButton.getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.setTitle("系統登入");
+            stage.show();
+
+        } catch (IOException e) {
+            System.err.println("無法載入登入畫面：" + e.getMessage());
+            e.printStackTrace();
+            // 如果無法載入登入畫面，至少關閉當前視窗
+            Stage stage = (Stage) logoutButton.getScene().getWindow();
+            stage.close();
         }
     }
 

@@ -17,40 +17,40 @@
          </font>
       </Label>
 
-      <Label layoutX="50.0" layoutY="70.0" text="活動日期:">
+      <Label layoutX="34.0" layoutY="70.0" text="活動日期:">
          <font>
             <Font size="16.0" />
          </font>
       </Label>
 
-      <DatePicker fx:id="eventDatePicker" layoutX="130.0" layoutY="67.0" prefHeight="30.0" prefWidth="150.0" promptText="選擇日期">
+      <DatePicker fx:id="eventDatePicker" layoutX="114.0" layoutY="67.0" prefHeight="30.0" prefWidth="150.0" promptText="選擇日期">
       </DatePicker>
 
-      <Label layoutX="300.0" layoutY="70.0" text="活動關鍵字:">
+      <Label layoutX="317.0" layoutY="70.0" text="活動關鍵字:">
          <font>
             <Font size="16.0" />
          </font>
       </Label>
 
-      <TextField fx:id="keywordField" layoutX="390.0" layoutY="67.0" prefHeight="30.0" prefWidth="150.0" promptText="請輸入活動關鍵字">
+      <TextField fx:id="keywordField" layoutX="412.0" layoutY="67.0" prefHeight="30.0" prefWidth="150.0" promptText="請輸入活動關鍵字">
          <font>
             <Font size="14.0" />
          </font>
       </TextField>
 
-      <Button fx:id="searchButton" layoutX="560.0" layoutY="67.0" mnemonicParsing="false" onAction="#handleSearch" prefHeight="30.0" prefWidth="80.0" style="-fx-background-color: #3498db; -fx-text-fill: white;" text="查詢">
+      <Button fx:id="searchButton" layoutX="586.0" layoutY="67.0" mnemonicParsing="false" onAction="#handleSearch" prefHeight="30.0" prefWidth="80.0" style="-fx-background-color: #3498db; -fx-text-fill: white;" text="查詢">
          <font>
             <Font size="14.0" />
          </font>
       </Button>
 
-      <Button fx:id="showAllButton" layoutX="50.0" layoutY="110.0" mnemonicParsing="false" onAction="#handleShowAll" prefHeight="30.0" prefWidth="80.0" style="-fx-background-color: #27ae60; -fx-text-fill: white;" text="顯示全部">
+      <Button fx:id="showAllButton" layoutX="34.0" layoutY="110.0" mnemonicParsing="false" onAction="#handleShowAll" prefHeight="30.0" prefWidth="80.0" style="-fx-background-color: #27ae60; -fx-text-fill: white;" text="顯示全部">
          <font>
             <Font size="14.0" />
          </font>
       </Button>
 
-      <Button fx:id="refreshButton" layoutX="140.0" layoutY="110.0" mnemonicParsing="false" onAction="#handleRefresh" prefHeight="30.0" prefWidth="80.0" style="-fx-background-color: #95a5a6; -fx-text-fill: white;" text="重新整理">
+      <Button fx:id="refreshButton" layoutX="130.0" layoutY="110.0" mnemonicParsing="false" onAction="#handleRefresh" prefHeight="30.0" prefWidth="80.0" style="-fx-background-color: #95a5a6; -fx-text-fill: white;" text="重新整理">
          <font>
             <Font size="14.0" />
          </font>
@@ -62,30 +62,27 @@
          </font>
       </Button>
 
-      <TableView fx:id="registrationTable" layoutX="50.0" layoutY="160.0" prefHeight="240.0" prefWidth="700.0">
+      <TableView fx:id="registrationTable" layoutX="34.0" layoutY="156.0" prefHeight="240.0" prefWidth="724.0">
          <columns>
-            <TableColumn fx:id="eventNameColumn" prefWidth="120.0" text="活動標題" />
-            <TableColumn fx:id="eventDateColumn" prefWidth="80.0" text="日期" />
-            <TableColumn fx:id="eventTimeColumn" prefWidth="60.0" text="時間" />
-            <TableColumn fx:id="locationColumn" prefWidth="100.0" text="地點" />
-            <TableColumn fx:id="organizerColumn" prefWidth="100.0" text="主辦單位" />
-            <TableColumn fx:id="registrationDateColumn" prefWidth="100.0" text="報名日期" />
-            <TableColumn fx:id="statusColumn" prefWidth="70.0" text="狀態" />
-            <TableColumn fx:id="actionColumn" prefWidth="70.0" text="操作" />
+            <TableColumn fx:id="eventNameColumn" prefWidth="105.0" text="活動標題" />
+            <TableColumn fx:id="eventDateColumn" prefWidth="95.0" text="日期" />
+            <TableColumn fx:id="eventTimeColumn" prefWidth="95.0" text="時間" />
+            <TableColumn fx:id="locationColumn" prefWidth="99.0" text="地點" />
+            <TableColumn fx:id="organizerColumn" prefWidth="103.0" text="主辦單位" />
+            <TableColumn fx:id="registrationDateColumn" prefWidth="108.0" text="報名日期" />
+            <TableColumn fx:id="statusColumn" prefWidth="117.0" text="狀態" />
          </columns>
       </TableView>
 
-      <Label fx:id="totalLabel" layoutX="50.0" layoutY="420.0" text="總計活動: 0 項">
+      <Label fx:id="totalLabel" layoutX="34.0" layoutY="423.0" text="總計活動: 0 項">
          <font>
             <Font size="14.0" />
          </font>
       </Label>
 
-      <Button fx:id="cancelSelectedButton" layoutX="482.0" layoutY="415.0" mnemonicParsing="false"
-              onAction="#handleCancelSelected" prefHeight="35.0" prefWidth="118.0"
-              style="-fx-background-color: #e74c3c; -fx-text-fill: white;" text="取消選中報名"></Button>
+      <Button fx:id="cancelSelectedButton" layoutX="542.0" layoutY="415.0" mnemonicParsing="false" onAction="#handleCancelSelected" prefHeight="35.0" prefWidth="118.0" style="-fx-background-color: #e74c3c; -fx-text-fill: white;" text="取消選中報名" />
 
-      <Button fx:id="backButton" layoutX="620.0" layoutY="415.0" mnemonicParsing="false" onAction="#handleBack" prefHeight="35.0" prefWidth="80.0" style="-fx-background-color: #34495e; -fx-text-fill: white;" text="返回">
+      <Button fx:id="backButton" layoutX="678.0" layoutY="415.0" mnemonicParsing="false" onAction="#handleBack" prefHeight="35.0" prefWidth="80.0" style="-fx-background-color: #34495e; -fx-text-fill: white;" text="返回">
          <font>
             <Font size="14.0" />
          </font>

@@ -6,24 +6,24 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" prefWidth="700.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="HostMainController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="HostMainController">
    <children>
       <!-- 標題 -->
-      <Label layoutX="248.0" layoutY="50.0" text="主辦人管理系統" textAlignment="CENTER">
+      <Label layoutX="302.0" layoutY="53.0" text="主辦人管理系統" textAlignment="CENTER">
          <font>
             <Font size="28.0" />
          </font>
       </Label>
 
       <!-- 歡迎訊息 -->
-      <Label layoutX="250.0" layoutY="100.0" text="歡迎使用校園活動管理系統" textAlignment="CENTER">
+      <Label layoutX="304.0" layoutY="103.0" text="歡迎使用校園活動管理系統" textAlignment="CENTER">
          <font>
             <Font size="16.0" />
          </font>
       </Label>
 
       <!-- 功能按鈕區域 -->
-      <VBox layoutX="250.0" layoutY="180.0" prefWidth="200.0" spacing="20.0">
+      <VBox layoutX="300.0" layoutY="182.0" prefWidth="200.0" spacing="20.0">
          <children>
             <!-- 活動管理按鈕 -->
             <Button fx:id="eventManagementButton" onAction="#handleEventManagement" prefHeight="50.0" prefWidth="200.0" style="-fx-background-color: #2196F3; -fx-text-fill: white; -fx-font-size: 16px;" text="活動管理">
@@ -40,7 +40,7 @@
       </VBox>
 
       <!-- 版權資訊 -->
-      <Label layoutX="250.0" layoutY="450.0" text="© 2025 校園活動管理系統" textAlignment="CENTER">
+      <Label layoutX="329.0" layoutY="447.0" text="© 2025 校園活動管理系統" textAlignment="CENTER">
          <font>
             <Font size="12.0" />
          </font>

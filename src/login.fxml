@@ -6,28 +6,19 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-<?import javafx.scene.text.Text?>
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
-            prefHeight="860.0" prefWidth="1500.0"
-            xmlns="http://javafx.com/javafx/23.0.1"
-            xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="login">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="login">
    <children>
-      <Label layoutX="695.0" layoutY="256.0" text="Login">
+      <Label layoutX="345.0" layoutY="118.0" text="Login">
          <font>
             <Font name="Tw Cen MT" size="52.0" />
          </font>
       </Label>
-      <Button layoutX="691.0" layoutY="480.0" mnemonicParsing="false"
-              prefHeight="40.0" prefWidth="119.0" text="登入"
-              onAction="#handleLogin">
+      <Button layoutX="341.0" layoutY="342.0" mnemonicParsing="false" onAction="#handleLogin" prefHeight="40.0" prefWidth="119.0" text="登入">
          <font>
             <Font size="20.0" />
          </font>
       </Button>
-      <TextField fx:id="studentIdField" layoutX="615.0" layoutY="351.0"
-                 prefHeight="40.0" prefWidth="270.0"
-                 promptText="請輸入學號/員工編號" />
-      <TextField fx:id="passwordField" layoutX="615.0" layoutY="420.0" prefHeight="40.0" prefWidth="270.0" promptText="請輸入密碼" />
+      <TextField fx:id="studentIdField" layoutX="265.0" layoutY="213.0" prefHeight="40.0" prefWidth="270.0" promptText="請輸入學號/員工編號" />
+      <TextField fx:id="passwordField" layoutX="265.0" layoutY="282.0" prefHeight="40.0" prefWidth="270.0" promptText="請輸入密碼" />
    </children>
 </AnchorPane>

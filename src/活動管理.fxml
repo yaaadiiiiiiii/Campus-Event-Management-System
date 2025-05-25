@@ -26,7 +26,7 @@
         </HBox>
 
         <!-- 活動列表表格 -->
-        <TableView fx:id="eventTable" layoutX="50.0" layoutY="100.0" prefHeight="350.0" prefWidth="700.0">
+        <TableView fx:id="eventTable" layoutX="50.0" layoutY="100.0" prefHeight="350.0" prefWidth="699.0">
             <columns>
                 <TableColumn fx:id="titleColumn" prefWidth="120.0" text="標題" />
                 <TableColumn fx:id="locationColumn" prefWidth="100.0" text="地點" />
