@@ -5,13 +5,22 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.stage.Stage;
+import model.Organizer;
 
 import java.io.IOException;
 
 public class HostMainController {
 
+    private Organizer organizer;
+
     @FXML private Button eventManagementButton;  // 活動管理按鈕
     @FXML private Button logoutButton;           // 登出按鈕
+
+    public void setOrganizer(Organizer organizer) {
+        this.organizer = organizer;
+        // 更新主辦人資訊
+    }
+
 
     /**
      * 處理活動管理按鈕點擊事件

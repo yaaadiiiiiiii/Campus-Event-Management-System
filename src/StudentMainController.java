@@ -7,12 +7,15 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.stage.Stage;
+import model.Student;
 
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
 public class StudentMainController implements Initializable {
+
+    private Student student;
 
     @FXML
     private Button browseEventsButton;
@@ -27,7 +30,9 @@ public class StudentMainController implements Initializable {
         // 初始化方法，可以在此處設置初始狀態
         System.out.println("學生主畫面已載入");
     }
-
+    public void setStudent(Student student) {
+        this.student = student;
+    }
     /**
      * 處理瀏覽活動按鈕點擊事件
      */
@@ -42,6 +47,7 @@ public class StudentMainController implements Initializable {
             Scene scene = new Scene(root, 800, 500);
             stage.setScene(scene);
             stage.setTitle("瀏覽活動");
+            System.out.println();
 
         } catch (IOException e) {
             e.printStackTrace();

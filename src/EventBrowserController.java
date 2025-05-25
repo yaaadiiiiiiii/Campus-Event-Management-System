@@ -160,7 +160,7 @@ public class EventBrowserController implements Initializable {
         }
     }
 
-    // Event 類別
+    // model.Event 類別
     public static class Event {
         private final SimpleStringProperty eventName;
         private final SimpleStringProperty location;

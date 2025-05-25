@@ -6,7 +6,7 @@ PUSH：
 $ git init
 $ code .
 $ git clone https://github.com/yaaadiiiiiiii/SA.git
-$ git remote add origin https://github.com/yaaadiiiiiiii/Campus-Event-Management-System.git
+$ git remote add origin https://github.com/yaaadiiiiiiii/Campus-model.Event-Management-System.git
 $ git pull origin master
 $ git push -u origin master
 $ git pull origin master --rebase -->傳不上去的話打這個
