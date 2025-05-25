@@ -16,19 +16,21 @@ public class login {
 
     @FXML
     private TextField studentIdField;
+    @FXML
+    private TextField passwordField;
 
     @FXML
     public void handleLogin() {
         String userId = studentIdField.getText().trim();
+        String password = passwordField.getText().trim();
+        System.out.println("登入嘗試，帳號：" + userId + "，密碼：" + password);
 
-        System.out.println("登入按鈕已點擊，帳號：" + userId);
-
-        if (userId.isEmpty()) {
-            showAlert(AlertType.WARNING, "輸入錯誤", "請輸入學號或員工編號。");
+        if (userId.isEmpty() || password.isEmpty()) {
+            showAlert(AlertType.WARNING, "輸入錯誤", "請輸入帳號和密碼。");
             return;
         }
 
-        String userRole = validateUser(userId);
+        String userRole = validateUser(userId, password);
         if (userRole != null) {
             String welcomeMessage;
             String nextPage;
@@ -47,7 +49,9 @@ public class login {
             redirectToNextPage(nextPage);
 
         } else {
-            showAlert(AlertType.ERROR, "登入失敗", "無效的學號或員工編號。請重新輸入。");
+            showAlert(AlertType.ERROR, "登入失敗", "帳號或密碼錯誤，請重新輸入。");
+            // 清空密碼欄位，保留帳號
+            passwordField.clear();
         }
     }
 
@@ -56,7 +60,7 @@ public class login {
      * @param userId 使用者ID
      * @return 如果使用者存在，回傳角色('h'代表主辦人，'s'代表學生)，否則回傳null
      */
-    private String validateUser(String userId) {
+    private String validateUser(String userId, String password) {
         try (InputStream inputStream = getClass().getResourceAsStream("/users.csv");
              BufferedReader br = new BufferedReader(new InputStreamReader(inputStream))) {
 
@@ -68,9 +72,15 @@ public class login {
             String line;
             while ((line = br.readLine()) != null) {
                 String[] parts = line.trim().split(",");
-                if (parts.length >= 2 && parts[0].equals(userId)) {
-                    System.out.println("找到使用者：" + userId + "，角色：" + parts[1]);
-                    return parts[1]; // 回傳角色
+                if (parts.length >= 3) {
+                    String csvUserId = parts[0].trim();
+                    String csvPassword = parts[1].trim();
+                    String csvRole = parts[2].trim();
+
+                    if (csvUserId.equals(userId) && csvPassword.equals(password)) {
+                        System.out.println("驗證成功 - 使用者：" + userId + "，角色：" + csvRole);
+                        return csvRole; // 回傳角色
+                    }
                 }
             }
         } catch (IOException e) {
