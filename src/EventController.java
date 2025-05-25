@@ -115,7 +115,7 @@ public class EventController implements Initializable {
             event.setTitle(updatedEvent.getTitle());
             event.setLocation(updatedEvent.getLocation());
             event.setTime(updatedEvent.getTime());
-            event.setOrganizer(updatedEvent.getOrganizer());
+            event.setOrganizer(updatedEvent.getOrganizer().getId());
             event.setCapacity(updatedEvent.getCapacity());
 
             // 重新整理表格
