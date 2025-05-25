@@ -6,11 +6,17 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.stage.Stage;
+import model.User;
+import model.Student;
+import model.Organizer;
+import java.io.FileReader;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 
 public class login {
 
@@ -19,104 +25,135 @@ public class login {
     @FXML
     private TextField passwordField;
 
-    @FXML
-    public void handleLogin() {
-        String userId = studentIdField.getText().trim();
-        String password = passwordField.getText().trim();
-        System.out.println("登入嘗試，帳號：" + userId + "，密碼：" + password);
+    private ArrayList<User> userList = new ArrayList<>();
 
-        if (userId.isEmpty() || password.isEmpty()) {
-            showAlert(AlertType.WARNING, "輸入錯誤", "請輸入帳號和密碼。");
+    // 初始化時讀 users.csv 產生物件
+    public void initialize() {
+        loadUsersFromCSV();
+    }
+
+    private void loadUsersFromCSV() {
+        // 嘗試多種編碼方式
+        String[] encodings = {"Big5", "MS950", "UTF-8", "GBK"};
+
+        for (String encoding : encodings) {
+            try (InputStream inputStream = getClass().getResourceAsStream("/users.csv");
+                 BufferedReader br = new BufferedReader(new InputStreamReader(inputStream, encoding))) {
+
+                userList.clear(); // 清空之前的嘗試
+                String line;
+
+                // 讀取所有行並處理
+                while ((line = br.readLine()) != null) {
+                    // 跳過空行
+                    if (line.trim().isEmpty()) {
+                        continue;
+                    }
+
+                    // 處理每一行
+                    processUserLine(line);
+                }
+
+                // 檢查是否成功讀取到用戶
+                if (!userList.isEmpty()) {
+                    return; // 成功讀取，退出方法
+                }
+
+            } catch (Exception e) {
+                // 嘗試下一個編碼
+            }
+        }
+    }
+
+    private void processUserLine(String line) {
+        if (line == null || line.trim().isEmpty()) {
             return;
         }
 
-        String userRole = validateUser(userId, password);
-        if (userRole != null) {
-            String welcomeMessage;
-            String nextPage;
+        try {
+            String[] data = line.split(",");
 
-            if (userRole.equals("h")) {
-                welcomeMessage = "歡迎主辦人使用系統！";
-                nextPage = "/主辦人主畫面.fxml"; // 主辦人介面
-            } else {
-                welcomeMessage = "歡迎學生使用系統！";
-                nextPage = "/學生主畫面.fxml"; // 學生介面
-            }
+            if (data.length >= 4) {
+                String id = data[0].trim();
+                String name = data[1].trim();
+                String password = data[2].trim();
+                String role = data[3].trim();
 
-            showAlert(AlertType.INFORMATION, "登入成功", welcomeMessage);
+                // 跳過明顯是標題的行
+                if (id.equalsIgnoreCase("id") || id.equalsIgnoreCase("學號") || id.contains("ID")) {
+                    return;
+                }
 
-            // 關閉登入視窗並開啟對應介面
-            redirectToNextPage(nextPage);
-
-        } else {
-            showAlert(AlertType.ERROR, "登入失敗", "帳號或密碼錯誤，請重新輸入。");
-            // 清空密碼欄位，保留帳號
-            passwordField.clear();
-        }
-    }
-
-    /**
-     * 驗證使用者身份
-     * @param userId 使用者ID
-     * @return 如果使用者存在，回傳角色('h'代表主辦人，'s'代表學生)，否則回傳null
-     */
-    private String validateUser(String userId, String password) {
-        try (InputStream inputStream = getClass().getResourceAsStream("/users.csv");
-             BufferedReader br = new BufferedReader(new InputStreamReader(inputStream))) {
-
-            if (inputStream == null) {
-                System.err.println("找不到 users.csv 檔案");
-                return null;
-            }
-
-            String line;
-            while ((line = br.readLine()) != null) {
-                String[] parts = line.trim().split(",");
-                if (parts.length >= 3) {
-                    String csvUserId = parts[0].trim();
-                    String csvPassword = parts[1].trim();
-                    String csvRole = parts[2].trim();
-
-                    if (csvUserId.equals(userId) && csvPassword.equals(password)) {
-                        System.out.println("驗證成功 - 使用者：" + userId + "，角色：" + csvRole);
-                        return csvRole; // 回傳角色
-                    }
+                if (role.equalsIgnoreCase("s")) {
+                    userList.add(new Student(id, name, password));
+                } else if (role.equalsIgnoreCase("h")) {
+                    userList.add(new Organizer(id, name, password));
                 }
             }
-        } catch (IOException e) {
-            System.err.println("讀取 CSV 檔案時發生錯誤：" + e.getMessage());
-            e.printStackTrace();
-        }
-
-        return null;
-    }
-
-    /**
-     * 導向對應的介面
-     * @param fxmlPath FXML檔案路徑
-     */
-    private void redirectToNextPage(String fxmlPath) {
-        try {
-            // 載入新的場景
-            Parent root = FXMLLoader.load(getClass().getResource(fxmlPath));
-            Stage stage = (Stage) studentIdField.getScene().getWindow();
-            stage.setScene(new Scene(root));
-            stage.setTitle("系統主頁");
-            stage.show();
-        } catch (IOException e) {
-            System.err.println("無法載入介面：" + fxmlPath);
-            e.printStackTrace();
-            // 如果無法載入指定介面，至少關閉登入視窗
-            Stage stage = (Stage) studentIdField.getScene().getWindow();
-            stage.close();
+        } catch (Exception e) {
+            // 靜默處理錯誤
         }
     }
 
-    private void showAlert(AlertType alertType, String title, String content) {
-        Alert alert = new Alert(alertType);
+    @FXML
+    private void handleLogin() {
+        String userId = studentIdField.getText().trim();
+        String password = passwordField.getText().trim();
+
+        if (userId.isEmpty() || password.isEmpty()) {
+            showAlert(AlertType.WARNING, "輸入錯誤", "請輸入學號和密碼。");
+            passwordField.clear(); // 清除密碼欄位
+            return;
+        }
+
+        for (User u : userList) {
+            if (u.getId().equals(userId) && u.getPassword().equals(password)) {
+                showAlert(AlertType.INFORMATION, "登入成功", "歡迎，" + u.getName() + "！");
+                if (u instanceof Student) {
+                    loadStudentMain((Student) u);
+                } else if (u instanceof Organizer) {
+                    loadOrganizerMain((Organizer) u);
+                }
+                return;
+            }
+        }
+
+        showAlert(AlertType.ERROR, "登入失敗", "學號或密碼錯誤！");
+        passwordField.clear(); // 登入失敗時清除密碼欄位
+    }
+
+    private void showAlert(AlertType type, String title, String msg) {
+        Alert alert = new Alert(type);
         alert.setTitle(title);
         alert.setHeaderText(null);
-        alert.setContentText(content);
+        alert.setContentText(msg);
         alert.showAndWait();
+    }
+
+    // 主畫面切換，根據你的FXML配置
+    private void loadStudentMain(Student student) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("學生主畫面.fxml"));
+            Parent root = loader.load();
+            StudentMainController controller = loader.getController();
+            controller.setStudent(student);
+            Stage stage = (Stage) studentIdField.getScene().getWindow();
+            stage.setScene(new Scene(root));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void loadOrganizerMain(Organizer organizer) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("主辦人主畫面.fxml"));
+            Parent root = loader.load();
+            HostMainController controller = loader.getController();
+            controller.setOrganizer(organizer);
+            Stage stage = (Stage) studentIdField.getScene().getWindow();
+            stage.setScene(new Scene(root));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

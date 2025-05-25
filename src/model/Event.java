@@ -1,3 +1,5 @@
+package model;
+
 public class Event {
     private String title;        // 標題
     private String location;     // 地點

@@ -1,4 +1,5 @@
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -48,10 +49,12 @@ public class EventBrowserController implements Initializable {
         capacityColumn.setCellValueFactory(new PropertyValueFactory<>("remainingCapacity"));
 
         // 報名按鈕欄位
+        // 報名按鈕欄位
         actionColumn.setCellFactory(new Callback<TableColumn<Event, Void>, TableCell<Event, Void>>() {
             @Override
             public TableCell<Event, Void> call(TableColumn<Event, Void> param) {
                 return new TableCell<Event, Void>() {
+                    private final Button registerButton = new Button();
                     private final Button registerButton = new Button();
 
                     {
@@ -74,6 +77,10 @@ public class EventBrowserController implements Initializable {
                                 registerButton.setStyle("-fx-background-color: #27ae60; -fx-text-fill: white;");
                             } else if (event.getRemainingCapacity() <= 0) {
                                 registerButton.setText("已額滿");
+                                registerButton.setDisable(true);
+                                registerButton.setStyle("-fx-background-color: #cccccc;");
+                            } else if (event.isRegistered()) {
+                                registerButton.setText("已報名");
                                 registerButton.setDisable(true);
                                 registerButton.setStyle("-fx-background-color: #cccccc;");
                             } else {
@@ -273,13 +280,56 @@ public class EventBrowserController implements Initializable {
 
 
 
-    // Event 類別
+    private void saveEventsToCSV() {
+        try {
+            String csvPath = "src/main/resources/活動列表.csv";
+            File csvFile = new File(csvPath);
+
+            if (!csvFile.exists()) {
+                csvPath = "活動列表.csv";
+                csvFile = new File(csvPath);
+            }
+
+            FileWriter writer = new FileWriter(csvFile, false);
+            PrintWriter printWriter = new PrintWriter(writer);
+
+            // 寫入標題行
+            printWriter.println("標題,地點,時間,主辦單位,名額");
+
+            // 寫入所有活動資料
+            for (Event event : eventList) {
+                printWriter.printf("%s,%s,%s,%s,%d%n",
+                        event.getEventName(),
+                        event.getLocation(),
+                        event.getTime(),
+                        event.getOrganizer(),
+                        event.getRemainingCapacity()
+                );
+            }
+
+            printWriter.close();
+            writer.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("錯誤");
+            alert.setHeaderText(null);
+            alert.setContentText("無法更新 CSV 檔案: " + e.getMessage());
+            alert.showAndWait();
+        }
+    }
+
+
+
+    // model.Event 類別
     public static class Event {
         private final SimpleStringProperty eventName;
         private final SimpleStringProperty location;
         private final SimpleStringProperty time;
         private final SimpleStringProperty organizer;
         private final SimpleIntegerProperty remainingCapacity;
+        private final SimpleBooleanProperty registered = new SimpleBooleanProperty(false);
         private final SimpleBooleanProperty registered = new SimpleBooleanProperty(false);
 
         public Event(String eventName, String location, String time, String organizer, int remainingCapacity) {
@@ -317,6 +367,7 @@ public class EventBrowserController implements Initializable {
         public String getTime() { return time.get(); }
         public String getOrganizer() { return organizer.get(); }
         public int getRemainingCapacity() { return remainingCapacity.get(); }
+        public boolean isRegistered() { return registered.get(); }
         public boolean isRegistered() { return registered.get(); }
 
         // Setter methods
