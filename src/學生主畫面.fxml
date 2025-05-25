@@ -12,7 +12,7 @@
          <font>
             <Font size="20.0" />
          </font></Button>
-      <Button layoutX="241.0" layoutY="218.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="119.0" text="報名活動">
+      <Button layoutX="224.0" layoutY="218.0" mnemonicParsing="false" prefHeight="41.0" prefWidth="155.0" text="查詢報名紀錄">
          <font>
             <Font size="20.0" />
          </font></Button>

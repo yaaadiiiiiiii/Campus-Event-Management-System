@@ -10,7 +10,7 @@
 
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="EventController">
     <children>
-        <Label layoutX="250.0" layoutY="20.0" text="Campus Event Management System" textAlignment="CENTER">
+        <Label layoutX="197.0" layoutY="20.0" text="Campus Event Management System" textAlignment="CENTER">
             <font>
                 <Font size="24.0" />
             </font>
@@ -21,8 +21,7 @@
             <children>
                 <Button fx:id="addButton" onAction="#handleAddEvent" prefHeight="30.0" prefWidth="80.0" text="新增活動" />
                 <Button fx:id="refreshButton" onAction="#handleRefresh" prefHeight="30.0" prefWidth="80.0" text="重新整理" />
-                <Button fx:id="backButton" onAction="#handleBackToMain" prefHeight="30.0" prefWidth="80.0" text="返回主畫面"
-                        style="-fx-background-color: #9E9E9E; -fx-text-fill: white;" />
+                <Button fx:id="backButton" onAction="#handleBackToMain" prefHeight="30.0" prefWidth="80.0" style="-fx-background-color: #9E9E9E; -fx-text-fill: white;" text="返回主畫面" />
             </children>
         </HBox>
 

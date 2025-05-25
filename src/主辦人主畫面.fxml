@@ -9,7 +9,7 @@
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" prefWidth="700.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="HostMainController">
    <children>
       <!-- 標題 -->
-      <Label layoutX="200.0" layoutY="50.0" text="主辦人管理系統" textAlignment="CENTER">
+      <Label layoutX="248.0" layoutY="50.0" text="主辦人管理系統" textAlignment="CENTER">
          <font>
             <Font size="28.0" />
          </font>
@@ -23,28 +23,18 @@
       </Label>
 
       <!-- 功能按鈕區域 -->
-      <VBox layoutX="250.0" layoutY="180.0" spacing="20.0" prefWidth="200.0">
+      <VBox layoutX="250.0" layoutY="180.0" prefWidth="200.0" spacing="20.0">
          <children>
             <!-- 活動管理按鈕 -->
-            <Button fx:id="eventManagementButton" onAction="#handleEventManagement"
-                    prefHeight="50.0" prefWidth="200.0" text="活動管理"
-                    style="-fx-background-color: #2196F3; -fx-text-fill: white; -fx-font-size: 16px;">
+            <Button fx:id="eventManagementButton" onAction="#handleEventManagement" prefHeight="50.0" prefWidth="200.0" style="-fx-background-color: #2196F3; -fx-text-fill: white; -fx-font-size: 16px;" text="活動管理">
             </Button>
 
             <!-- 報名管理按鈕 -->
-            <Button prefHeight="50.0" prefWidth="200.0" text="報名管理"
-                    style="-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-size: 16px;">
-            </Button>
-
-            <!-- 統計報表按鈕 -->
-            <Button prefHeight="50.0" prefWidth="200.0" text="統計報表"
-                    style="-fx-background-color: #FF9800; -fx-text-fill: white; -fx-font-size: 16px;">
+            <Button prefHeight="50.0" prefWidth="200.0" style="-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-size: 16px;" text="報名名單查詢">
             </Button>
 
             <!-- 登出按鈕 -->
-            <Button fx:id="logoutButton" onAction="#handleLogout"
-                    prefHeight="50.0" prefWidth="200.0" text="登出"
-                    style="-fx-background-color: #f44336; -fx-text-fill: white; -fx-font-size: 16px;">
+            <Button fx:id="logoutButton" onAction="#handleLogout" prefHeight="50.0" prefWidth="200.0" style="-fx-background-color: #f44336; -fx-text-fill: white; -fx-font-size: 16px;" text="登出">
             </Button>
          </children>
       </VBox>
