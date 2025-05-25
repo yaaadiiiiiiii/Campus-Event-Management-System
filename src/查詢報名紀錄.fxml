@@ -9,7 +9,7 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="RegistrationQueryController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="RegistrationRecordController">
    <children>
       <Label layoutX="306.0" layoutY="23.0" text="查詢報名記錄" textFill="#2c3e50">
          <font>
@@ -81,11 +81,9 @@
          </font>
       </Label>
 
-      <Button fx:id="cancelSelectedButton" layoutX="482.0" layoutY="415.0" mnemonicParsing="false" onAction="#handleRegisterSelected" prefHeight="35.0" prefWidth="118.0" style="-fx-background-color: #e74c3c; -fx-text-fill: white;" text="報名選中活動">
-         <font>
-            <Font size="14.0" />
-         </font>
-      </Button>
+      <Button fx:id="cancelSelectedButton" layoutX="482.0" layoutY="415.0" mnemonicParsing="false"
+              onAction="#handleCancelSelected" prefHeight="35.0" prefWidth="118.0"
+              style="-fx-background-color: #e74c3c; -fx-text-fill: white;" text="取消選中報名"></Button>
 
       <Button fx:id="backButton" layoutX="620.0" layoutY="415.0" mnemonicParsing="false" onAction="#handleBack" prefHeight="35.0" prefWidth="80.0" style="-fx-background-color: #34495e; -fx-text-fill: white;" text="返回">
          <font>
