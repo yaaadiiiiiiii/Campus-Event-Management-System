@@ -95,16 +95,7 @@ public class RegistrationListController implements Initializable {
 
     private void loadSampleData() {
         // 載入範例報名資料（實際應該從資料庫讀取）
-        allRegistrations.addAll(
-                new Registration("A001", "王小明", "資訊工程系", "wang@email.com", "0912345678", "程式設計工作坊", "2024-06-10 10:30"),
-                new Registration("A002", "李美華", "企業管理系", "li@email.com", "0923456789", "創業講座", "2024-06-11 14:20"),
-                new Registration("A003", "張志豪", "資訊工程系", "zhang@email.com", "0934567890", "程式設計工作坊", "2024-06-10 11:45"),
-                new Registration("A004", "陳雅婷", "外國語文系", "chen@email.com", "0945678901", "英語角", "2024-06-12 09:15"),
-                new Registration("A005", "林建宏", "音樂系", "lin@email.com", "0956789012", "音樂會", "2024-06-13 16:30"),
-                new Registration("A006", "黃淑芬", "中國文學系", "huang@email.com", "0967890123", "文學講座", "2024-06-14 13:45"),
-                new Registration("A007", "吳志明", "資訊工程系", "wu@email.com", "0978901234", "程式設計工作坊", "2024-06-10 15:20"),
-                new Registration("A008", "劉雅琪", "企業管理系", "liu@email.com", "0989012345", "創業講座", "2024-06-11 16:10")
-        );
+
     }
 
     @FXML
