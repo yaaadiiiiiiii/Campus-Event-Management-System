@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="RegistrationListController">
+    <children>
+        <!-- 標題 -->
+        <Label layoutX="359.0" layoutY="30.0" text="報名名單查詢" textAlignment="CENTER">
+            <font>
+                <Font size="24.0" />
+            </font>
+        </Label>
+
+        <!-- 搜尋區域 -->
+        <HBox layoutX="50.0" layoutY="80.0" spacing="15.0">
+            <children>
+                <Label text="選擇活動：">
+                    <font>
+                        <Font size="14.0" />
+                    </font>
+                </Label>
+                <ComboBox fx:id="eventComboBox" onAction="#handleEventSelection" prefWidth="200.0" promptText="請選擇活動" />
+
+                <Label text="搜尋學生：">
+                    <font>
+                        <Font size="14.0" />
+                    </font>
+                </Label>
+                <TextField fx:id="studentSearchField" prefWidth="150.0" promptText="學號或姓名" />
+                <Button fx:id="searchButton" onAction="#handleSearch" style="-fx-background-color: #2196F3; -fx-text-fill: white;" text="搜尋" />
+                <Button fx:id="clearButton" onAction="#handleClear" style="-fx-background-color: #9E9E9E; -fx-text-fill: white;" text="清除" />
+            </children>
+        </HBox>
+
+        <!-- 統計資訊 -->
+        <HBox layoutX="50.0" layoutY="130.0" spacing="30.0">
+            <children>
+                <Label fx:id="totalRegistrationsLabel" text="總報名人數：0">
+                    <font>
+                        <Font size="14.0" />
+                    </font>
+                </Label>
+                <Label fx:id="remainingCapacityLabel" text="剩餘名額：0">
+                    <font>
+                        <Font size="14.0" />
+                    </font>
+                </Label>
+                <Label fx:id="eventStatusLabel" text="活動狀態：未選擇">
+                    <font>
+                        <Font size="14.0" />
+                    </font>
+                </Label>
+            </children>
+        </HBox>
+
+        <!-- 報名名單表格 -->
+        <TableView fx:id="registrationTable" layoutX="50.0" layoutY="170.0" prefHeight="350.0" prefWidth="800.0">
+            <columns>
+                <TableColumn fx:id="sequenceColumn" prefWidth="100.0" text="序號" />
+                <TableColumn fx:id="studentIdColumn" prefWidth="211.0" text="學號" />
+                <TableColumn fx:id="studentNameColumn" prefWidth="251.0" text="姓名" />
+                <TableColumn fx:id="registrationTimeColumn" prefWidth="237.0" text="報名時間" />
+            </columns>
+        </TableView>
+
+        <!-- 操作按鈕區域 -->
+        <HBox layoutX="50.0" layoutY="540.0" spacing="15.0">
+            <children>
+                <Button fx:id="exportButton" onAction="#handleExport" prefHeight="30.0" prefWidth="100.0" style="-fx-background-color: #4CAF50; -fx-text-fill: white;" text="匯出Excel" />
+                <Button fx:id="refreshButton" onAction="#handleRefresh" prefHeight="30.0" prefWidth="80.0" style="-fx-background-color: #FF9800; -fx-text-fill: white;" text="重新整理" />
+                <Button fx:id="deleteButton" onAction="#handleDeleteRegistration" prefHeight="30.0" prefWidth="100.0" style="-fx-background-color: #f44336; -fx-text-fill: white;" text="取消報名" />
+            </children>
+        </HBox>
+
+        <!-- 返回按鈕 -->
+        <Button fx:id="backButton" layoutX="780.0" layoutY="540.0" onAction="#handleBackToMain" prefHeight="30.0" prefWidth="70.0" style="-fx-background-color: #34495e; -fx-text-fill: white;" text="返回">
+            <font>
+                <Font size="14.0" />
+            </font>
+        </Button>
+    </children>
+</AnchorPane>
