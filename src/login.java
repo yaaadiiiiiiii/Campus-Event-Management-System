@@ -137,12 +137,17 @@ public class login {
             Parent root = loader.load();
             StudentMainController controller = loader.getController();
             controller.setStudent(student);
+
+            // 如果學生主畫面有活動瀏覽功能，也可以在這裡設定學生ID
+            // 或者在學生主畫面的 Controller 中處理
+
             Stage stage = (Stage) studentIdField.getScene().getWindow();
             stage.setScene(new Scene(root));
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+
 
     private void loadOrganizerMain(Organizer organizer) {
         try {

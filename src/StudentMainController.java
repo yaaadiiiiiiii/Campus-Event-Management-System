@@ -38,22 +38,29 @@ public class StudentMainController implements Initializable {
      */
     @FXML
     private void handleBrowseEvents(ActionEvent event) {
+        if (student == null) {
+            showErrorAlert("錯誤", "學生資訊遺失", "請重新登入！");
+            return;
+        }
+
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("活動瀏覽.fxml"));
             Parent root = loader.load();
 
-            Stage stage = (Stage) browseEventsButton.getScene().getWindow();
+            // 取得 EventBrowserController 並設定學生資訊
+            EventBrowserController eventController = loader.getController();
+            eventController.setCurrentStudent(student); // 傳遞學生物件
 
+            Stage stage = (Stage) browseEventsButton.getScene().getWindow();
             Scene scene = new Scene(root, 800, 500);
             stage.setScene(scene);
             stage.setTitle("瀏覽活動");
-            System.out.println();
-
         } catch (IOException e) {
             e.printStackTrace();
             showErrorAlert("錯誤", "無法載入瀏覽活動頁面", e.getMessage());
         }
     }
+
 
     /**
      * 處理報名活動按鈕點擊事件

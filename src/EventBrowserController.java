@@ -13,7 +13,10 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 import javafx.util.Callback;
+import model.Student;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.io.*;
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -30,9 +33,21 @@ public class EventBrowserController implements Initializable {
     @FXML private TableColumn<Event, Integer> capacityColumn;
     @FXML private TableColumn<Event, Void> actionColumn;
     @FXML private Button backButton;
-
+    private String currentStudentId;
+    private Student currentStudent;
     private ObservableList<Event> eventList = FXCollections.observableArrayList();
     private ObservableList<Event> filteredEventList = FXCollections.observableArrayList();
+
+    // 設定當前登入學生ID的方法
+    public void setCurrentStudent(Student student) {
+        this.currentStudent = student;
+        this.currentStudentId = student.getId();
+        System.out.println("當前登入學生: " + student.getName() + " (ID: " + student.getId() + ")");
+
+        if (eventTable != null) {
+            eventTable.refresh();
+        }
+    }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -70,7 +85,12 @@ public class EventBrowserController implements Initializable {
                             setGraphic(null);
                         } else {
                             Event event = getTableView().getItems().get(getIndex());
-                            if (event.isRegistered()) {
+
+                            // 檢查當前學生是否已報名此活動
+                            boolean alreadyRegistered = (currentStudentId != null) &&
+                                    isAlreadyRegistered(currentStudentId, event.getEventName());
+
+                            if (alreadyRegistered) {
                                 registerButton.setText("已報名");
                                 registerButton.setDisable(true);
                                 registerButton.setStyle("-fx-background-color: #27ae60; -fx-text-fill: white;");
@@ -86,6 +106,7 @@ public class EventBrowserController implements Initializable {
                             setGraphic(registerButton);
                         }
                     }
+
                 };
             }
         });
@@ -185,8 +206,15 @@ public class EventBrowserController implements Initializable {
     @FXML
     private void handleBackToMain() {
         try {
-            // 返回學生主畫面
-            Parent root = FXMLLoader.load(getClass().getResource("/學生主畫面.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/學生主畫面.fxml"));
+            Parent root = loader.load();
+
+            // 重新設定學生資訊
+            StudentMainController controller = loader.getController();
+            if (currentStudent != null) {
+                controller.setStudent(currentStudent);
+            }
+
             Stage stage = (Stage) searchField.getScene().getWindow();
             stage.setScene(new Scene(root, 800, 500));
             stage.setTitle("學生系統");
@@ -197,22 +225,36 @@ public class EventBrowserController implements Initializable {
         }
     }
 
+
     private void handleRegistration(Event event) {
-        if (event.isRegistered()) {
-            // 如果已經報名，顯示已報名訊息
+        if (currentStudentId == null) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("錯誤");
+            alert.setHeaderText(null);
+            alert.setContentText("無法取得學生資訊，請重新登入！");
+            alert.showAndWait();
+            return;
+        }
+
+        // 檢查是否已經報名過這個活動
+        if (isAlreadyRegistered(currentStudentId, event.getEventName())) {
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setTitle("已報名");
             alert.setHeaderText(null);
             alert.setContentText("您已經報名過「" + event.getEventName() + "」活動！");
             alert.showAndWait();
+            return;
+        }
 
-        } else if (event.getRemainingCapacity() > 0) {
+        if (event.getRemainingCapacity() > 0) {
             // 執行報名
             event.setRemainingCapacity(event.getRemainingCapacity() - 1);
-            event.setRegistered(true);
             eventTable.refresh();
 
-            // 更新 CSV 檔案
+            // 將報名資訊寫入已報名.csv檔案
+            saveRegistrationToCSV(currentStudentId, event.getEventName());
+
+            // 更新活動列表CSV檔案
             saveEventsToCSV();
 
             // 顯示報名成功訊息
@@ -233,23 +275,102 @@ public class EventBrowserController implements Initializable {
         }
     }
 
+    private void saveRegistrationToCSV(String studentId, String eventName) {
+        try {
+            String csvPath = "已報名.csv";
+            File csvFile = new File(csvPath);
+
+            // 檢查檔案是否存在，如果不存在則建立並寫入標題行
+            boolean fileExists = csvFile.exists();
+
+            FileWriter writer = new FileWriter(csvFile, true); // true = 附加模式
+            PrintWriter printWriter = new PrintWriter(writer);
+
+            // 如果是新檔案，先寫入標題行
+            if (!fileExists) {
+                printWriter.println("學生ID,活動名稱,報名時間");
+            }
+
+            // 取得當前時間
+            java.time.LocalDateTime now = java.time.LocalDateTime.now();
+            java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            String currentTime = now.format(formatter);
+
+            // 寫入報名資料
+            printWriter.printf("%s,%s,%s%n", studentId, eventName, currentTime);
+
+            printWriter.close();
+            writer.close();
+
+            System.out.println("報名資訊已寫入已報名.csv檔案");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("錯誤");
+            alert.setHeaderText(null);
+            alert.setContentText("無法寫入報名資料: " + e.getMessage());
+            alert.showAndWait();
+        }
+    }
+
+    private boolean isAlreadyRegistered(String studentId, String eventName) {
+        try {
+            File csvFile = new File("已報名.csv");
+            if (!csvFile.exists()) {
+                return false;
+            }
+
+            BufferedReader reader = new BufferedReader(new FileReader(csvFile));
+            String line;
+            boolean isFirstLine = true;
+
+            while ((line = reader.readLine()) != null) {
+                // 跳過標題行
+                if (isFirstLine) {
+                    isFirstLine = false;
+                    continue;
+                }
+
+                String[] parts = line.split(",", -1);
+                if (parts.length >= 2) {
+                    String registeredStudentId = parts[0].trim();
+                    String registeredEventName = parts[1].trim();
+
+                    if (registeredStudentId.equals(studentId) && registeredEventName.equals(eventName)) {
+                        reader.close();
+                        return true;
+                    }
+                }
+            }
+
+            reader.close();
+            return false;
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     private void saveEventsToCSV() {
         try {
             String csvPath = "src/main/resources/活動列表.csv";
             File csvFile = new File(csvPath);
 
+            // 如果在 resources 中找不到，嘗試當前目錄
             if (!csvFile.exists()) {
                 csvPath = "活動列表.csv";
                 csvFile = new File(csvPath);
             }
 
-            FileWriter writer = new FileWriter(csvFile, false);
+            FileWriter writer = new FileWriter(csvFile, false); // false = 覆寫檔案
             PrintWriter printWriter = new PrintWriter(writer);
 
             // 寫入標題行
             printWriter.println("標題,地點,時間,主辦單位,名額");
 
-            // 寫入所有活動資料
+            // 寫入所有活動資料（包含更新後的名額）
             for (Event event : eventList) {
                 printWriter.printf("%s,%s,%s,%s,%d%n",
                         event.getEventName(),
@@ -263,6 +384,8 @@ public class EventBrowserController implements Initializable {
             printWriter.close();
             writer.close();
 
+            System.out.println("活動資料已更新到 CSV 檔案");
+
         } catch (IOException e) {
             e.printStackTrace();
             Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -272,6 +395,7 @@ public class EventBrowserController implements Initializable {
             alert.showAndWait();
         }
     }
+
 
     // model.Event 類別
     public static class Event {
