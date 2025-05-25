@@ -58,7 +58,7 @@ public class StudentMainController implements Initializable {
     private void handleRegisterEvents(ActionEvent event) {
         try {
             // 載入報名活動頁面
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("活動管理.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("查詢報名紀錄.fxml"));
             Parent root = loader.load();
 
             // 獲取當前視窗
