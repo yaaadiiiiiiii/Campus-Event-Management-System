@@ -1,14 +1,18 @@
-
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.stage.Stage;
 import javafx.util.Callback;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
@@ -85,7 +89,9 @@ public class EventBrowserController implements Initializable {
                 new Event("創業講座", "演講廳B", "2024-06-20 10:00", "商管學院", 50),
                 new Event("攝影比賽", "校園各處", "2024-06-25 全天", "攝影社", 30),
                 new Event("英語角", "語言中心", "2024-06-18 18:00", "英語學習中心", 15),
-                new Event("音樂會", "音樂廳", "2024-06-22 19:30", "音樂系", 100)
+                new Event("音樂會", "音樂廳", "2024-06-22 19:30", "音樂系", 100),
+                new Event("籃球比賽", "體育館", "2024-06-28 15:00", "體育系", 0), // 測試額滿狀態
+                new Event("文學講座", "圖書館", "2024-07-01 10:00", "中文系", 25)
         );
         filteredEventList.setAll(eventList);
     }
@@ -104,6 +110,27 @@ public class EventBrowserController implements Initializable {
                     filteredEventList.add(event);
                 }
             }
+        }
+    }
+
+    @FXML
+    private void showAllEvents() {
+        searchField.clear();
+        filteredEventList.setAll(eventList);
+    }
+
+    @FXML
+    private void handleBackToMain() {
+        try {
+            // 返回學生主畫面
+            Parent root = FXMLLoader.load(getClass().getResource("/學生主畫面.fxml"));
+            Stage stage = (Stage) searchField.getScene().getWindow();
+            stage.setScene(new Scene(root, 600, 400));
+            stage.setTitle("學生系統");
+            stage.show();
+        } catch (IOException e) {
+            System.err.println("無法載入學生主畫面：" + e.getMessage());
+            e.printStackTrace();
         }
     }
 
