@@ -33,12 +33,9 @@ public class login {
     }
 
     private void loadUsersFromCSV() {
-        // 嘗試多種編碼方式
-        String[] encodings = {"Big5", "MS950", "UTF-8", "GBK"};
 
-        for (String encoding : encodings) {
             try (InputStream inputStream = getClass().getResourceAsStream("/users.csv");
-                 BufferedReader br = new BufferedReader(new InputStreamReader(inputStream, encoding))) {
+                 BufferedReader br = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"))) {
 
                 userList.clear(); // 清空之前的嘗試
                 String line;
@@ -62,7 +59,6 @@ public class login {
             } catch (Exception e) {
                 // 嘗試下一個編碼
             }
-        }
     }
 
     private void processUserLine(String line) {

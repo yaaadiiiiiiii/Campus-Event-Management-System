@@ -1,4 +1,5 @@
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
@@ -84,9 +85,28 @@ public class EventDialog extends Dialog<Event> {
         saveButton.setDisable(true);
 
         // 監聽輸入欄位變化
-        titleField.textProperty().addListener((observable, oldValue, newValue) -> {
-            saveButton.setDisable(newValue.trim().isEmpty());
-        });
+        ChangeListener<String> formListener = (observable, oldValue, newValue) -> {
+            saveButton.setDisable(
+                    titleField.getText().trim().isEmpty() ||
+                            locationField.getText().trim().isEmpty() ||
+                            timeField.getText().trim().isEmpty() ||
+                            capacityField.getText().trim().isEmpty()
+            );
+        };
+
+        // 加到所有輸入欄位上
+        titleField.textProperty().addListener(formListener);
+        locationField.textProperty().addListener(formListener);
+        timeField.textProperty().addListener(formListener);
+        capacityField.textProperty().addListener(formListener);
+
+        // 啟動時也先檢查一次
+        saveButton.setDisable(
+                titleField.getText().trim().isEmpty() ||
+                        locationField.getText().trim().isEmpty() ||
+                        timeField.getText().trim().isEmpty() ||
+                        capacityField.getText().trim().isEmpty()
+        );
 
         getDialogPane().setContent(grid);
 

@@ -16,9 +16,12 @@ import model.Organizer;
 
 import java.io.*;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
-import java.util.UUID;
+import java.util.HashSet;
+import java.util.Set;
 
 public class EventController implements Initializable {
 
@@ -34,18 +37,23 @@ public class EventController implements Initializable {
     @FXML private Button backButton;
 
     private ObservableList<Event> eventList = FXCollections.observableArrayList();
-    private Organizer currentOrganizer; // 添加當前主辦人資訊
+    private Organizer currentOrganizer;
 
-    private final String csvPath = "活動列表.csv";
+    // 用户ID到名称的映射
+    private Map<String, String> userIdToNameMap = new HashMap<>();
+
+    private final String csvPath = "src/活動列表.csv";
+    private final String usersPath = "src/users.csv";
 
     public void setCurrentOrganizer(Organizer organizer) {
         this.currentOrganizer = organizer;
+        loadUserIdToNameMapping(); // 加载用户映射
+        loadEventsFromCSV();
     }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         setupTableColumns();
-        loadEventsFromCSV();
         eventTable.setItems(eventList);
     }
 
@@ -53,6 +61,7 @@ public class EventController implements Initializable {
         titleColumn.setCellValueFactory(new PropertyValueFactory<>("title"));
         locationColumn.setCellValueFactory(new PropertyValueFactory<>("location"));
         timeColumn.setCellValueFactory(new PropertyValueFactory<>("time"));
+        // 显示主办单位名称而不是ID
         organizerColumn.setCellValueFactory(cellData ->
                 new ReadOnlyStringWrapper(cellData.getValue().getOrganizer().getName()));
         capacityColumn.setCellValueFactory(new PropertyValueFactory<>("capacity"));
@@ -102,19 +111,54 @@ public class EventController implements Initializable {
         actionColumn.setCellFactory(cellFactory);
     }
 
+    /**
+     * 加载用户ID到名称的映射
+     */
+    private void loadUserIdToNameMapping() {
+        userIdToNameMap.clear();
+        File usersFile = new File(usersPath);
+
+        if (usersFile.exists()) {
+            try (BufferedReader br = new BufferedReader(
+                    new InputStreamReader(new FileInputStream(usersFile), "UTF-8"))) {
+
+                String line;
+                while ((line = br.readLine()) != null) {
+                    String[] tokens = line.split(",", -1);
+                    if (tokens.length >= 2) {
+                        String userId = tokens[0].trim();
+                        String userName = tokens[1].trim();
+                        userIdToNameMap.put(userId, userName);
+                    }
+                }
+                System.out.println("加载用户映射完成，共 " + userIdToNameMap.size() + " 个用户");
+
+            } catch (IOException e) {
+                System.err.println("无法读取用户文件：" + e.getMessage());
+                e.printStackTrace();
+            }
+        } else {
+            System.out.println("用户文件不存在：" + usersPath);
+        }
+    }
+
+    /**
+     * 根据用户ID获取用户名称
+     */
+    private String getUserNameById(String userId) {
+        return userIdToNameMap.getOrDefault(userId, userId); // 如果找不到名称，返回ID
+    }
+
     @FXML
     private void handleAddEvent() {
-        EventDialog dialog = new EventDialog();
+        EventDialog dialog = new EventDialog(null, currentOrganizer);
         Optional<Event> result = dialog.showAndWait();
 
         result.ifPresent(event -> {
-            // 生成唯一ID
             String eventId = generateEventId();
-            // 設定當前主辦人
             if (currentOrganizer != null) {
                 event.setOrganizer(currentOrganizer);
             }
-            // 創建新的Event物件，包含ID
             Event newEvent = new Event(eventId, event.getTitle(), event.getLocation(),
                     event.getTime(), event.getCapacity(), event.getOrganizer());
 
@@ -133,7 +177,7 @@ public class EventController implements Initializable {
             event.setLocation(updatedEvent.getLocation());
             event.setTime(updatedEvent.getTime());
             event.setCapacity(updatedEvent.getCapacity());
-            // 保持原主辦人
+            event.setOrganizer(currentOrganizer);
             eventTable.refresh();
             saveEventsToCSV();
             showAlert("成功", "活動已成功更新！", Alert.AlertType.INFORMATION);
@@ -156,6 +200,7 @@ public class EventController implements Initializable {
 
     @FXML
     private void handleRefresh() {
+        loadUserIdToNameMapping(); // 刷新时重新加载用户映射
         loadEventsFromCSV();
         eventTable.refresh();
         showAlert("完成", "資料已重新整理！", Alert.AlertType.INFORMATION);
@@ -167,7 +212,6 @@ public class EventController implements Initializable {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/主辦人主畫面.fxml"));
             Parent root = loader.load();
 
-            // 傳遞主辦人資訊回主畫面
             HostMainController controller = loader.getController();
             if (currentOrganizer != null) {
                 controller.setOrganizer(currentOrganizer);
@@ -184,99 +228,160 @@ public class EventController implements Initializable {
         }
     }
 
-    // 生成唯一活動ID
     private String generateEventId() {
-        return "A" + String.format("%02d", eventList.size() + 1);
-    }
+        Set<String> existingIds = new HashSet<>();
 
-    // CSV 載入方法 - 修正版本
-    private void loadEventsFromCSV() {
-        eventList.clear();
-
-        // 先嘗試讀取 resources 資料夾中的檔案
-        try (InputStream inputStream = getClass().getResourceAsStream("/活動列表.csv")) {
-            if (inputStream != null) {
-                loadFromInputStream(inputStream);
-                return;
-            }
-        } catch (IOException e) {
-            System.out.println("無法從 resources 讀取檔案，嘗試從當前目錄讀取...");
-        }
-
-        // 如果 resources 中沒有，嘗試從當前目錄讀取
+        // 讀取CSV檔案中所有現有的活動編號
         File file = new File(csvPath);
         if (file.exists()) {
             try (BufferedReader br = new BufferedReader(
                     new InputStreamReader(new FileInputStream(file), "UTF-8"))) {
-                loadFromBufferedReader(br);
+
+                String line;
+                boolean firstLine = true;
+
+                while ((line = br.readLine()) != null) {
+                    if (firstLine) {
+                        firstLine = false;
+                        continue; // 跳過標題行
+                    }
+
+                    String[] tokens = line.split(",", -1);
+                    if (tokens.length >= 1) {
+                        String existingId = tokens[0].trim();
+                        if (!existingId.isEmpty()) {
+                            existingIds.add(existingId);
+                        }
+                    }
+                }
             } catch (IOException e) {
-                e.printStackTrace();
-                showAlert("錯誤", "無法讀取活動列表！", Alert.AlertType.ERROR);
+                System.err.println("讀取現有活動編號時發生錯誤：" + e.getMessage());
             }
-        } else {
-            System.out.println("CSV 檔案不存在，將建立新檔案");
         }
+
+        // 生成唯一的活動編號
+        int counter = 1;
+        String newId;
+
+        do {
+            newId = "A" + String.format("%02d", counter);
+            counter++;
+        } while (existingIds.contains(newId));
+
+        System.out.println("生成新的活動編號：" + newId);
+        return newId;
     }
 
-    private void loadFromInputStream(InputStream inputStream) throws IOException {
-        try (BufferedReader br = new BufferedReader(
-                new InputStreamReader(inputStream, "UTF-8"))) {
-            loadFromBufferedReader(br);
+    /**
+     * 只加载当前主办人的活动，并正确显示主办单位名称
+     */
+    private void loadEventsFromCSV() {
+        if (currentOrganizer == null) return;
+        eventList.clear();
+
+        File file = new File(csvPath);
+
+        if (file.exists()) {
+            try (BufferedReader br = new BufferedReader(
+                    new InputStreamReader(new FileInputStream(file), "UTF-8"))) {
+                loadFromBufferedReader(br);
+                System.out.println("從檔案載入活動資料：" + csvPath + "，當前主辦人 " + currentOrganizer.getName() + " 共有 " + eventList.size() + " 個活動");
+            } catch (IOException e) {
+                e.printStackTrace();
+                showAlert("錯誤", "無法讀取活動列表檔案：" + e.getMessage(), Alert.AlertType.ERROR);
+            }
+        } else {
+            System.out.println("CSV 檔案不存在：" + csvPath + "，建立空白活動列表");
+            try {
+                saveEventsToCSV();
+            } catch (Exception e) {
+                System.out.println("無法創建 CSV 檔案：" + e.getMessage());
+            }
         }
     }
 
     private void loadFromBufferedReader(BufferedReader br) throws IOException {
         String line;
         boolean firstLine = true;
+        int lineNumber = 0;
 
         while ((line = br.readLine()) != null) {
+            lineNumber++;
+
             if (firstLine) {
                 firstLine = false;
-                continue; // 跳過標題行
+                System.out.println("CSV 標題行：" + line);
+                continue;
             }
 
             String[] tokens = line.split(",", -1);
+            System.out.println("處理第 " + lineNumber + " 行：" + line);
+
             if (tokens.length >= 6) {
                 try {
                     String id = tokens[0].trim();
                     String title = tokens[1].trim();
                     String location = tokens[2].trim();
                     String time = tokens[3].trim();
-                    String organizerName = tokens[4].trim();
+                    String organizerId = tokens[4].trim();
                     int capacity = Integer.parseInt(tokens[5].trim());
 
-                    // 創建主辦人物件
-                    Organizer organizer = new Organizer("", organizerName, "");
+                    System.out.println("解析資料 - ID: " + id + ", 標題: " + title + ", 主辦人ID: " + organizerId + ", 當前主辦人ID: " + (currentOrganizer != null ? currentOrganizer.getId() : "null"));
 
-                    // 創建活動物件
-                    Event event = new Event(id, title, location, time, capacity, organizer);
-                    eventList.add(event);
+                    if (organizerId.isEmpty()) {
+                        System.out.println("警告：活動 '" + title + "' 的主辦單位為空，跳過此筆資料");
+                        continue;
+                    }
+
+                    // 根据ID获取主办人名称
+                    String organizerName = getUserNameById(organizerId);
+
+                    // 创建主办人对象，使用正确的名称
+                    Organizer organizer = new Organizer(organizerId, organizerName, "");
+
+                    // 只显示当前主办人的活动
+                    if (currentOrganizer != null && organizerId.equals(currentOrganizer.getId())) {
+                        Event event = new Event(id, title, location, time, capacity, organizer);
+                        eventList.add(event);
+                        System.out.println("成功加入活動：" + title + "，主办人：" + organizerName);
+                    } else {
+                        System.out.println("主辦人ID不符，跳過活動：" + title + " (活動主辦人：" + organizerName + "，當前登入：" + currentOrganizer.getName() + ")");
+                    }
 
                 } catch (NumberFormatException e) {
-                    System.out.println("解析數字時發生錯誤：" + line);
+                    System.out.println("解析數字時發生錯誤 (第" + lineNumber + "行)：" + line + ", 錯誤：" + e.getMessage());
                 }
+            } else {
+                System.out.println("資料格式不正確 (第" + lineNumber + "行，欄位數量: " + tokens.length + ")：" + line);
             }
         }
-
-        System.out.println("成功載入 " + eventList.size() + " 個活動");
     }
 
+    /**
+     * 保存活动到CSV - 保存时使用主办单位ID
+     */
     private void saveEventsToCSV() {
         try (BufferedWriter bw = new BufferedWriter(
                 new OutputStreamWriter(new FileOutputStream(csvPath), "UTF-8"))) {
 
-            // 寫入標題行（與 CSV 格式一致）
+            // 写入标题行
             bw.write("活動編號,標題,地點,時間,主辦單位,名額");
             bw.newLine();
 
-            // 寫入活動資料
+            // 写入活动资料 - 主办单位字段保存ID而非名称
             for (Event event : eventList) {
+                String organizerId = event.getOrganizer().getId();
+                if (organizerId == null || organizerId.isEmpty()) {
+                    // 如果没有ID，使用当前主办人的ID
+                    organizerId = currentOrganizer != null ? currentOrganizer.getId() : "";
+                }
+
                 String line = String.format("%s,%s,%s,%s,%s,%d",
                         event.getId() != null ? event.getId() : generateEventId(),
                         event.getTitle(),
                         event.getLocation(),
                         event.getTime(),
-                        event.getOrganizer().getName(),
+                        organizerId,  // 保存ID而非名称
                         event.getCapacity());
                 bw.write(line);
                 bw.newLine();
