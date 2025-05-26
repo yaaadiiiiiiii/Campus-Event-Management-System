@@ -12,7 +12,9 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 import javafx.util.Callback;
+import model.Organizer;
 import model.Student;
+
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -34,6 +36,7 @@ public class EventBrowserController implements Initializable {
     @FXML private Button backButton;
     private String currentStudentId;
     private Student currentStudent;
+    private Organizer currentOrganizer;
     private ObservableList<Event> eventList = FXCollections.observableArrayList();
     private ObservableList<Event> filteredEventList = FXCollections.observableArrayList();
 
@@ -155,6 +158,10 @@ public class EventBrowserController implements Initializable {
                         remainingCapacity = Integer.parseInt(parts[4].trim());
                     } catch (NumberFormatException e) {
                         remainingCapacity = 0;
+                    }
+
+                    if (currentOrganizer!= null && !organizer.equals(currentOrganizer.getId())) {
+                        continue; // 不顯示非自己的活動
                     }
 
                     Event event = new Event(

@@ -1,48 +1,109 @@
 package model;
 
-import java.util.ArrayList;
-import java.util.List;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleStringProperty;
 
 public class Event {
-    private String id;
-    private String title;        // 標題
-    private String location;     // 地點
-    private String time;         // 時間
-    private Organizer organizer;   // 主辦單位
-    private int capacity;        // 名額
-    private List<Student> participants;
+    private final SimpleStringProperty id;
+    private final SimpleStringProperty title;
+    private final SimpleStringProperty location;
+    private final SimpleStringProperty time;
+    private final SimpleIntegerProperty capacity;
+    private Organizer organizer;
 
-    // 建構子
-    public Event(String id, String title, String location, String time, int capacity,Organizer organizer) {
-        this.id = id;
-        this.title = title;
-        this.location = location;
-        this.time = time;
-        this.capacity = capacity;
+    // 完整建構子
+    public Event(String id, String title, String location, String time, int capacity, Organizer organizer) {
+        this.id = new SimpleStringProperty(id);
+        this.title = new SimpleStringProperty(title);
+        this.location = new SimpleStringProperty(location);
+        this.time = new SimpleStringProperty(time);
+        this.capacity = new SimpleIntegerProperty(capacity);
         this.organizer = organizer;
-        this.participants = new ArrayList<>();
     }
 
+    // 簡化建構子（用於對話框）
+    public Event(String title, String location, String time, String organizer, int capacity) {
+        this("", title, location, time, capacity, new Organizer("", organizer, ""));
+    }
 
-    // Getter 和 Setter 方法
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
+    // ID 相關方法
+    public String getId() {
+        return id.get();
+    }
 
-    public String getTitle() { return title; }
-    public void setTitle(String title) { this.title = title; }
+    public void setId(String id) {
+        this.id.set(id);
+    }
 
-    public String getLocation() { return location; }
-    public void setLocation(String location) { this.location = location; }
+    public SimpleStringProperty idProperty() {
+        return id;
+    }
 
-    public String getTime() { return time; }
-    public void setTime(String time) { this.time = time; }
+    // 標題相關方法
+    public String getTitle() {
+        return title.get();
+    }
 
-    public Organizer getOrganizer() { return organizer; }
-    public void setOrganizer(Organizer organizer) { this.organizer = organizer; }
+    public void setTitle(String title) {
+        this.title.set(title);
+    }
 
-    public int getCapacity() { return capacity; }
-    public void setCapacity(int capacity) { this.capacity = capacity; }
+    public SimpleStringProperty titleProperty() {
+        return title;
+    }
 
-    public List<Student> getParticipants() { return participants; }
-    public void setParticipants(List<Student> participants) { this.participants = participants; }
+    // 地點相關方法
+    public String getLocation() {
+        return location.get();
+    }
+
+    public void setLocation(String location) {
+        this.location.set(location);
+    }
+
+    public SimpleStringProperty locationProperty() {
+        return location;
+    }
+
+    // 時間相關方法
+    public String getTime() {
+        return time.get();
+    }
+
+    public void setTime(String time) {
+        this.time.set(time);
+    }
+
+    public SimpleStringProperty timeProperty() {
+        return time;
+    }
+
+    // 名額相關方法
+    public int getCapacity() {
+        return capacity.get();
+    }
+
+    public void setCapacity(int capacity) {
+        this.capacity.set(capacity);
+    }
+
+    public SimpleIntegerProperty capacityProperty() {
+        return capacity;
+    }
+
+    // 主辦人相關方法
+    public Organizer getOrganizer() {
+        return organizer;
+    }
+
+    public void setOrganizer(Organizer organizer) {
+        this.organizer = organizer;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("Event{id='%s', title='%s', location='%s', time='%s', capacity=%d, organizer='%s'}",
+                getId(), getTitle(), getLocation(), getTime(), getCapacity(),
+                organizer != null ? organizer.getName() : "無");
+    }
 }

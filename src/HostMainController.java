@@ -4,6 +4,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.stage.Stage;
 import model.Organizer;
 
@@ -15,12 +16,16 @@ public class HostMainController {
 
     @FXML private Button eventManagementButton;  // 活動管理按鈕
     @FXML private Button logoutButton;           // 登出按鈕
+    @FXML private Label welcomeLabel;            // 歡迎標籤（可選）
 
     public void setOrganizer(Organizer organizer) {
         this.organizer = organizer;
-        // 更新主辦人資訊
+        // 更新主辦人資訊顯示
+        if (welcomeLabel != null && organizer != null) {
+            welcomeLabel.setText("歡迎，" + organizer.getName() + "!");
+        }
+        System.out.println("設定主辦人：" + organizer.getName() + " (ID: " + organizer.getId() + ")");
     }
-
 
     /**
      * 處理活動管理按鈕點擊事件
@@ -31,6 +36,13 @@ public class HostMainController {
             // 載入活動管理畫面
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/活動管理.fxml"));
             Parent root = loader.load();
+
+            // 取得 EventController 並設定當前主辦人
+            EventController controller = loader.getController();
+            if (organizer != null) {
+                controller.setCurrentOrganizer(organizer);
+                System.out.println("已將主辦人資訊傳遞到活動管理畫面：" + organizer.getName());
+            }
 
             // 取得當前視窗
             Stage stage = (Stage) eventManagementButton.getScene().getWindow();
@@ -57,9 +69,11 @@ public class HostMainController {
             // 回到登入畫面
             Parent root = FXMLLoader.load(getClass().getResource("/login.fxml"));
             Stage stage = (Stage) logoutButton.getScene().getWindow();
-            stage.setScene(new Scene(root));
+            stage.setScene(new Scene(root, 800, 500));
             stage.setTitle("系統登入");
             stage.show();
+
+            System.out.println("主辦人 " + (organizer != null ? organizer.getName() : "未知") + " 已登出");
 
         } catch (IOException e) {
             System.err.println("無法載入登入畫面：" + e.getMessage());
