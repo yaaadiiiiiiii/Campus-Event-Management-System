@@ -11,13 +11,11 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.net.URL;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.ResourceBundle;
 
 public class RegistrationListController implements Initializable {
@@ -33,9 +31,6 @@ public class RegistrationListController implements Initializable {
     @FXML private TableColumn<Registration, Integer> sequenceColumn;
     @FXML private TableColumn<Registration, String> studentIdColumn;
     @FXML private TableColumn<Registration, String> studentNameColumn;
-    @FXML private TableColumn<Registration, String> departmentColumn;
-    @FXML private TableColumn<Registration, String> emailColumn;
-    @FXML private TableColumn<Registration, String> phoneColumn;
     @FXML private TableColumn<Registration, String> registrationTimeColumn;
     @FXML private Button exportButton;
     @FXML private Button refreshButton;
@@ -46,11 +41,18 @@ public class RegistrationListController implements Initializable {
     private ObservableList<Registration> filteredRegistrations = FXCollections.observableArrayList();
     private ObservableList<String> eventList = FXCollections.observableArrayList();
 
+    // 儲存活動資訊的 Map
+    private Map<String, EventInfo> eventInfoMap = new HashMap<>();
+
+    // 儲存學生資訊的 Map（如果有學生資料的話）
+    private Map<String, String> studentNameMap = new HashMap<>();
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         setupTableColumns();
-        loadEventList();
-        loadSampleData();
+        loadUserData();
+        loadEventData();
+        loadRegistrationData();
         setupEventComboBox();
 
         // 預設顯示所有報名記錄
@@ -67,23 +69,138 @@ public class RegistrationListController implements Initializable {
 
         studentIdColumn.setCellValueFactory(new PropertyValueFactory<>("studentId"));
         studentNameColumn.setCellValueFactory(new PropertyValueFactory<>("studentName"));
-        departmentColumn.setCellValueFactory(new PropertyValueFactory<>("department"));
-        emailColumn.setCellValueFactory(new PropertyValueFactory<>("email"));
-        phoneColumn.setCellValueFactory(new PropertyValueFactory<>("phone"));
         registrationTimeColumn.setCellValueFactory(new PropertyValueFactory<>("registrationTime"));
     }
 
-    private void loadEventList() {
-        // 載入活動列表（實際應該從資料庫讀取）
-        eventList.addAll(
-                "程式設計工作坊",
-                "創業講座",
-                "攝影比賽",
-                "英語角",
-                "音樂會",
-                "籃球比賽",
-                "文學講座"
-        );
+    private void loadUserData() {
+        try {
+            // 讀取 users.csv
+            InputStream inputStream = getClass().getResourceAsStream("/users.csv");
+            if (inputStream == null) {
+                System.err.println("找不到users.csv檔案");
+                return;
+            }
+
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+            String line;
+
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (parts.length >= 4) {
+                    String userId = parts[0].trim();
+                    String userName = parts[1].trim();
+                    String userType = parts[3].trim();
+
+                    // 只儲存學生資料 (userType = "s")
+                    if ("s".equals(userType)) {
+                        studentNameMap.put(userId, userName);
+                    }
+                }
+            }
+            reader.close();
+
+            System.out.println("載入了 " + studentNameMap.size() + " 位學生資料");
+
+        } catch (IOException e) {
+            System.err.println("讀取使用者資料時發生錯誤：" + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private void loadEventData() {
+        try {
+            // 讀取活動列表.csv
+            InputStream inputStream = getClass().getResourceAsStream("/活動列表.csv");
+            if (inputStream == null) {
+                System.err.println("找不到活動列表.csv檔案");
+                return;
+            }
+
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+            String line;
+            boolean isFirstLine = true;
+
+            while ((line = reader.readLine()) != null) {
+                if (isFirstLine) {
+                    isFirstLine = false;
+                    continue; // 跳過標題行
+                }
+
+                String[] parts = line.split(",");
+                if (parts.length >= 6) {
+                    String eventId = parts[0].trim();
+                    String title = parts[1].trim();
+                    String location = parts[2].trim();
+                    String time = parts[3].trim();
+                    String organizer = parts[4].trim();
+                    int capacity = Integer.parseInt(parts[5].trim());
+
+                    EventInfo eventInfo = new EventInfo(eventId, title, location, time, organizer, capacity);
+                    eventInfoMap.put(eventId, eventInfo);
+                    eventList.add(title);
+                }
+            }
+            reader.close();
+
+        } catch (IOException | NumberFormatException e) {
+            System.err.println("讀取活動列表時發生錯誤：" + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private void loadRegistrationData() {
+        try {
+            // 讀取已報名.csv
+            InputStream inputStream = getClass().getResourceAsStream("/已報名.csv");
+            if (inputStream == null) {
+                System.err.println("找不到已報名.csv檔案");
+                return;
+            }
+
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+            String line;
+            boolean isFirstLine = true;
+
+            while ((line = reader.readLine()) != null) {
+                if (isFirstLine) {
+                    isFirstLine = false;
+                    continue; // 跳過標題行
+                }
+
+                String[] parts = line.split(",");
+                if (parts.length >= 3) {
+                    String studentId = parts[0].trim();
+                    String eventId = parts[1].trim();
+                    String registrationTime = parts[2].trim();
+
+                    // 從活動資訊中獲取活動名稱
+                    EventInfo eventInfo = eventInfoMap.get(eventId);
+                    String eventName = eventInfo != null ? eventInfo.getTitle() : "未知活動";
+
+                    // 獲取學生姓名（如果沒有學生資料，使用學號）
+                    String studentName = getStudentName(studentId);
+
+                    Registration registration = new Registration(
+                            studentId,
+                            studentName,
+                            eventName,
+                            registrationTime
+                    );
+
+                    allRegistrations.add(registration);
+                }
+            }
+            reader.close();
+
+        } catch (IOException e) {
+            System.err.println("讀取報名資料時發生錯誤：" + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private String getStudentName(String studentId) {
+        // 從 studentNameMap 中獲取學生姓名，如果找不到則返回學號
+        return studentNameMap.getOrDefault(studentId, studentId);
     }
 
     private void setupEventComboBox() {
@@ -91,11 +208,6 @@ public class RegistrationListController implements Initializable {
         // 添加"全部活動"選項
         eventComboBox.getItems().add(0, "全部活動");
         eventComboBox.setValue("全部活動");
-    }
-
-    private void loadSampleData() {
-        // 載入範例報名資料（實際應該從資料庫讀取）
-
     }
 
     @FXML
@@ -151,7 +263,7 @@ public class RegistrationListController implements Initializable {
         totalRegistrationsLabel.setText("總報名人數：" + totalRegistrations);
 
         if (selectedEvent != null && !selectedEvent.equals("全部活動")) {
-            // 這裡應該從資料庫獲取活動的總名額
+            // 從活動資訊中獲取總名額
             int totalCapacity = getTotalCapacityForEvent(selectedEvent);
             int remaining = Math.max(0, totalCapacity - totalRegistrations);
             remainingCapacityLabel.setText("剩餘名額：" + remaining);
@@ -163,17 +275,13 @@ public class RegistrationListController implements Initializable {
     }
 
     private int getTotalCapacityForEvent(String eventName) {
-        // 實際應該從資料庫獲取，這裡提供範例數據
-        switch (eventName) {
-            case "程式設計工作坊": return 20;
-            case "創業講座": return 50;
-            case "攝影比賽": return 30;
-            case "英語角": return 15;
-            case "音樂會": return 100;
-            case "籃球比賽": return 16;
-            case "文學講座": return 25;
-            default: return 0;
+        // 從活動資訊中獲取名額
+        for (EventInfo eventInfo : eventInfoMap.values()) {
+            if (eventInfo.getTitle().equals(eventName)) {
+                return eventInfo.getCapacity();
+            }
         }
+        return 0;
     }
 
     @FXML
@@ -199,23 +307,20 @@ public class RegistrationListController implements Initializable {
     }
 
     private void exportToCSV(File file) throws IOException {
-        try (FileWriter writer = new FileWriter(file, java.nio.charset.StandardCharsets.UTF_8)) {
+        try (FileWriter writer = new FileWriter(file, StandardCharsets.UTF_8)) {
             // 寫入 BOM 以支援中文
             writer.write('\uFEFF');
 
             // 寫入標題行
-            writer.write("序號,學號,姓名,系所,電子郵件,聯絡電話,活動名稱,報名時間\n");
+            writer.write("序號,學號,姓名,活動名稱,報名時間\n");
 
             // 寫入資料
             int sequence = 1;
             for (Registration registration : filteredRegistrations) {
-                writer.write(String.format("%d,%s,%s,%s,%s,%s,%s,%s\n",
+                writer.write(String.format("%d,%s,%s,%s,%s\n",
                         sequence++,
                         registration.getStudentId(),
                         registration.getStudentName(),
-                        registration.getDepartment(),
-                        registration.getEmail(),
-                        registration.getPhone(),
                         registration.getEventName(),
                         registration.getRegistrationTime()
                 ));
@@ -225,9 +330,21 @@ public class RegistrationListController implements Initializable {
 
     @FXML
     private void handleRefresh() {
-        // 重新載入資料（實際應該從資料庫重新讀取）
-        loadSampleData();
-        filterRegistrations();
+        // 重新載入資料
+        allRegistrations.clear();
+        eventList.clear();
+        eventInfoMap.clear();
+        studentNameMap.clear();
+
+        loadUserData();
+        loadEventData();
+        loadRegistrationData();
+        setupEventComboBox();
+
+        filteredRegistrations.setAll(allRegistrations);
+        registrationTable.setItems(filteredRegistrations);
+        updateStatistics();
+
         showInfoAlert("重新整理", "資料已更新");
     }
 
@@ -296,23 +413,42 @@ public class RegistrationListController implements Initializable {
         alert.showAndWait();
     }
 
+    // EventInfo 類別
+    private static class EventInfo {
+        private final String id;
+        private final String title;
+        private final String location;
+        private final String time;
+        private final String organizer;
+        private final int capacity;
+
+        public EventInfo(String id, String title, String location, String time, String organizer, int capacity) {
+            this.id = id;
+            this.title = title;
+            this.location = location;
+            this.time = time;
+            this.organizer = organizer;
+            this.capacity = capacity;
+        }
+
+        public String getId() { return id; }
+        public String getTitle() { return title; }
+        public String getLocation() { return location; }
+        public String getTime() { return time; }
+        public String getOrganizer() { return organizer; }
+        public int getCapacity() { return capacity; }
+    }
+
     // Registration 資料類別
     public static class Registration {
         private final SimpleStringProperty studentId;
         private final SimpleStringProperty studentName;
-        private final SimpleStringProperty department;
-        private final SimpleStringProperty email;
-        private final SimpleStringProperty phone;
         private final SimpleStringProperty eventName;
         private final SimpleStringProperty registrationTime;
 
-        public Registration(String studentId, String studentName, String department,
-                            String email, String phone, String eventName, String registrationTime) {
+        public Registration(String studentId, String studentName, String eventName, String registrationTime) {
             this.studentId = new SimpleStringProperty(studentId);
             this.studentName = new SimpleStringProperty(studentName);
-            this.department = new SimpleStringProperty(department);
-            this.email = new SimpleStringProperty(email);
-            this.phone = new SimpleStringProperty(phone);
             this.eventName = new SimpleStringProperty(eventName);
             this.registrationTime = new SimpleStringProperty(registrationTime);
         }
@@ -320,18 +456,12 @@ public class RegistrationListController implements Initializable {
         // Getter methods
         public String getStudentId() { return studentId.get(); }
         public String getStudentName() { return studentName.get(); }
-        public String getDepartment() { return department.get(); }
-        public String getEmail() { return email.get(); }
-        public String getPhone() { return phone.get(); }
         public String getEventName() { return eventName.get(); }
         public String getRegistrationTime() { return registrationTime.get(); }
 
         // Property methods for TableView binding
         public SimpleStringProperty studentIdProperty() { return studentId; }
         public SimpleStringProperty studentNameProperty() { return studentName; }
-        public SimpleStringProperty departmentProperty() { return department; }
-        public SimpleStringProperty emailProperty() { return email; }
-        public SimpleStringProperty phoneProperty() { return phone; }
         public SimpleStringProperty eventNameProperty() { return eventName; }
         public SimpleStringProperty registrationTimeProperty() { return registrationTime; }
     }
