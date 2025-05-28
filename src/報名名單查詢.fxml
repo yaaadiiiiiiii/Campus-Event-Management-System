@@ -76,7 +76,7 @@
             <children>
                 <Button fx:id="exportButton" onAction="#handleExport" prefHeight="30.0" prefWidth="100.0" style="-fx-background-color: #4CAF50; -fx-text-fill: white;" text="匯出Excel" />
                 <Button fx:id="refreshButton" onAction="#handleRefresh" prefHeight="30.0" prefWidth="80.0" style="-fx-background-color: #FF9800; -fx-text-fill: white;" text="重新整理" />
-                <Button fx:id="deleteButton" onAction="#handleDeleteRegistration" prefHeight="30.0" prefWidth="100.0" style="-fx-background-color: #f44336; -fx-text-fill: white;" text="取消報名" />
+<!--                <Button fx:id="deleteButton" onAction="#handleDeleteRegistration" prefHeight="30.0" prefWidth="100.0" style="-fx-background-color: #f44336; -fx-text-fill: white;" text="取消報名" />-->
             </children>
         </HBox>
 

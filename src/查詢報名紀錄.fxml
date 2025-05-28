@@ -68,7 +68,6 @@
             <TableColumn fx:id="eventDateColumn" prefWidth="95.0" text="日期" />
             <TableColumn fx:id="eventTimeColumn" prefWidth="95.0" text="時間" />
             <TableColumn fx:id="locationColumn" prefWidth="99.0" text="地點" />
-            <TableColumn fx:id="organizerColumn" prefWidth="103.0" text="主辦單位" />
             <TableColumn fx:id="registrationDateColumn" prefWidth="108.0" text="報名日期" />
             <TableColumn fx:id="statusColumn" prefWidth="117.0" text="狀態" />
          </columns>
