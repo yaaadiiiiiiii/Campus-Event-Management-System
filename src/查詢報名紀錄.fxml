@@ -64,11 +64,11 @@
 
       <TableView fx:id="registrationTable" layoutX="34.0" layoutY="156.0" prefHeight="240.0" prefWidth="724.0">
          <columns>
-            <TableColumn fx:id="eventNameColumn" prefWidth="105.0" text="活動標題" />
-            <TableColumn fx:id="eventDateColumn" prefWidth="95.0" text="日期" />
-            <TableColumn fx:id="eventTimeColumn" prefWidth="95.0" text="時間" />
-            <TableColumn fx:id="locationColumn" prefWidth="99.0" text="地點" />
-            <TableColumn fx:id="registrationDateColumn" prefWidth="108.0" text="報名日期" />
+            <TableColumn fx:id="eventTitleColumn" text="標題"/>
+            <TableColumn fx:id="locationColumn" text="地點"/>
+            <TableColumn fx:id="timeColumn" text="時間"/>
+            <TableColumn fx:id="organizerColumn" text="主辦單位"/>
+            <TableColumn fx:id="registrationTimeColumn" text="報名時間"/>
             <TableColumn fx:id="statusColumn" prefWidth="117.0" text="狀態" />
          </columns>
       </TableView>

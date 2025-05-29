@@ -24,12 +24,13 @@
 
         <TableView fx:id="eventTable" layoutX="39.0" layoutY="112.0" prefHeight="366.0" prefWidth="665.0">
             <columns>
-                <TableColumn fx:id="eventNameColumn" prefWidth="112.0" text="活動編號" />
-                <TableColumn fx:id="locationColumn" prefWidth="103.0" text="活動名稱" />
-                <TableColumn fx:id="timeColumn" prefWidth="102.0" text="地點" />
-                <TableColumn fx:id="organizerColumn" prefWidth="120.0" text="時間" />
-                <TableColumn fx:id="capacityColumn" prefWidth="71.0" text="名額" />
-                <TableColumn fx:id="actionColumn" prefWidth="156.0" text="報名" />
+                <TableColumn fx:id="eventIdColumn" text="活動編號" prefWidth="80"/>
+                <TableColumn fx:id="eventNameColumn" text="標題" prefWidth="120"/>
+                <TableColumn fx:id="locationColumn" text="地點" prefWidth="100"/>
+                <TableColumn fx:id="timeColumn" text="時間" prefWidth="150"/>
+                <TableColumn fx:id="organizerColumn" text="主辦單位" prefWidth="120"/>
+                <TableColumn fx:id="capacityColumn" text="名額" prefWidth="80"/>
+                <TableColumn fx:id="actionColumn" text="報名" prefWidth="80"/>
             </columns>
         </TableView>
 

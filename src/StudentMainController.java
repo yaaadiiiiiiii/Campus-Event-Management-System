@@ -2,7 +2,6 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -24,16 +23,19 @@ public class StudentMainController implements Initializable {
     @FXML
     private Button registerEventsButton;
 
-    @FXML private Button logoutButton;           // 登出按鈕
+    @FXML
+    private Button logoutButton;           // 登出按鈕
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        // 初始化方法，可以在此處設置初始狀態
         System.out.println("學生主畫面已載入");
     }
+
+    // 只保留這一個正確的 setStudent(Student)
     public void setStudent(Student student) {
         this.student = student;
     }
+
     /**
      * 處理瀏覽活動按鈕點擊事件
      */
@@ -62,62 +64,34 @@ public class StudentMainController implements Initializable {
         }
     }
 
-
     /**
-     * 處理報名活動按鈕點擊事件
+     * 處理報名活動按鈕點擊事件（查詢報名紀錄）
      */
     @FXML
     private void handleRegisterEvents(ActionEvent event) {
+        if (student == null) {
+            showErrorAlert("錯誤", "學生資訊遺失", "請重新登入！");
+            return;
+        }
+
         try {
-            // 載入報名活動頁面
             FXMLLoader loader = new FXMLLoader(getClass().getResource("查詢報名紀錄.fxml"));
             Parent root = loader.load();
 
-            // 獲取當前視窗
-            Stage stage = (Stage) registerEventsButton.getScene().getWindow();
+            // 取得 RegistrationRecordController 並傳遞學生ID
+            RegistrationRecordController controller = loader.getController();
+            controller.setCurrentStudentId(student.getId());
 
-            // 設置新場景
+            Stage stage = (Stage) registerEventsButton.getScene().getWindow();
             Scene scene = new Scene(root);
             stage.setScene(scene);
-            stage.setTitle("報名活動");
+            stage.setTitle("查詢報名紀錄");
             stage.show();
 
         } catch (IOException e) {
             e.printStackTrace();
             showErrorAlert("錯誤", "無法載入報名活動頁面", e.getMessage());
         }
-    }
-
-    // 在學生主畫面控制器中，當點擊「查詢報名紀錄」按鈕時：
-
-    @FXML
-    private void handleViewRegistrationRecords(ActionEvent event) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("報名紀錄查詢.fxml"));
-            Parent root = loader.load();
-
-            // 取得控制器並設定當前學生ID
-            RegistrationRecordController controller = loader.getController();
-            controller.setCurrentStudentId(currentStudentId); // currentStudentId 是當前登入的學生ID
-
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            Scene scene = new Scene(root);
-            stage.setScene(scene);
-            stage.setTitle("報名紀錄查詢");
-            stage.show();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            showErrorAlert("錯誤", "無法開啟報名紀錄頁面", e.getMessage());
-        }
-    }
-
-    // 假設您的學生主畫面控制器有一個設定當前學生的方法：
-    private String currentStudentId;
-
-    public void setCurrentStudent(String studentId) {
-        this.currentStudentId = studentId;
-        // 其他初始化邏輯...
     }
 
     /**
