@@ -348,27 +348,27 @@ public class RegistrationListController implements Initializable {
         showInfoAlert("重新整理", "資料已更新");
     }
 
-    @FXML
-    private void handleDeleteRegistration() {
-        Registration selected = registrationTable.getSelectionModel().getSelectedItem();
-        if (selected == null) {
-            showWarningAlert("請選擇要取消的報名記錄");
-            return;
-        }
-
-        Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
-        confirmAlert.setTitle("確認取消報名");
-        confirmAlert.setHeaderText("確定要取消以下報名記錄嗎？");
-        confirmAlert.setContentText("學生：" + selected.getStudentName() +
-                "\n活動：" + selected.getEventName());
-
-        if (confirmAlert.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK) {
-            allRegistrations.remove(selected);
-            filteredRegistrations.remove(selected);
-            updateStatistics();
-            showInfoAlert("取消成功", "已成功取消該學生的報名記錄");
-        }
-    }
+//    @FXML
+//    private void handleDeleteRegistration() {
+//        Registration selected = registrationTable.getSelectionModel().getSelectedItem();
+//        if (selected == null) {
+//            showWarningAlert("請選擇要取消的報名記錄");
+//            return;
+//        }
+//
+//        Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
+//        confirmAlert.setTitle("確認取消報名");
+//        confirmAlert.setHeaderText("確定要取消以下報名記錄嗎？");
+//        confirmAlert.setContentText("學生：" + selected.getStudentName() +
+//                "\n活動：" + selected.getEventName());
+//
+//        if (confirmAlert.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK) {
+//            allRegistrations.remove(selected);
+//            filteredRegistrations.remove(selected);
+//            updateStatistics();
+//            showInfoAlert("取消成功", "已成功取消該學生的報名記錄");
+//        }
+//    }
 
     @FXML
     private void handleBackToMain() {

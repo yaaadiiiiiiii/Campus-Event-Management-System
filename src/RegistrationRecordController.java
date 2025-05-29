@@ -1,302 +1,318 @@
-import javafx.event.ActionEvent;
-import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.fxml.Initializable;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.stage.Stage;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-
-import java.io.IOException;
+import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
+import javafx.scene.control.*;
+import javafx.event.ActionEvent;
+import java.io.*;
 import java.net.URL;
-import java.time.LocalDate;
-import java.util.ResourceBundle;
+import java.util.*;
 
 public class RegistrationRecordController implements Initializable {
 
-    @FXML
-    private DatePicker eventDatePicker;
+    @FXML private TableView<RegistrationRecord> registrationTable;
+    @FXML private TableColumn<RegistrationRecord, String> eventTitleColumn;
+    @FXML private TableColumn<RegistrationRecord, String> locationColumn;
+    @FXML private TableColumn<RegistrationRecord, String> timeColumn;
+    @FXML private TableColumn<RegistrationRecord, String> organizerColumn;
+    @FXML private TableColumn<RegistrationRecord, String> registrationTimeColumn;
+    @FXML private Label totalLabel;
 
-    @FXML
-    private TextField keywordField;
+    @FXML private TextField keywordField;     // 新增搜尋欄位 FXML 綁定
+    @FXML private Button searchButton;
+    @FXML private Button showAllButton;
+    @FXML private Button refreshButton;
+    @FXML private Button clearSearchButton;
+    @FXML private TableColumn<RegistrationRecord, String> statusColumn;
 
-    @FXML
-    private Button searchButton;
+    private ObservableList<RegistrationRecord> registrationData = FXCollections.observableArrayList();
+    private ObservableList<RegistrationRecord> allData = FXCollections.observableArrayList(); // 所有資料（for 顯示全部/搜尋）
+    private String currentStudentId = null; // 由主畫面呼叫 setCurrentStudentId 設定
 
-    @FXML
-    private Button showAllButton;
+    private static final String EVENT_CSV_PATH = "src/活動列表.csv";
+    private static final String REG_CSV_PATH = "src/已報名.csv";
 
-    @FXML
-    private Button refreshButton;
-
-    @FXML
-    private Button clearSearchButton;
-
-    @FXML
-    private TableView<RegistrationRecord> registrationTable;
-
-    @FXML
-    private TableColumn<RegistrationRecord, String> eventNameColumn;
-
-    @FXML
-    private TableColumn<RegistrationRecord, String> eventDateColumn;
-
-    @FXML
-    private TableColumn<RegistrationRecord, String> eventTimeColumn;
-
-    @FXML
-    private TableColumn<RegistrationRecord, String> locationColumn;
-
-    @FXML
-    private TableColumn<RegistrationRecord, String> organizerColumn;
-
-    @FXML
-    private TableColumn<RegistrationRecord, String> registrationDateColumn;
-
-    @FXML
-    private TableColumn<RegistrationRecord, String> statusColumn;
-
-    @FXML
-    private TableColumn<RegistrationRecord, Button> actionColumn;
-
-    @FXML
-    private Label totalLabel;
-
-    @FXML
-    private Button cancelSelectedButton;
-
-    @FXML
-    private Button backButton;
-
-    @FXML
-    private Label messageLabel;
-
-    private ObservableList<RegistrationRecord> registrationData;
+    private Map<String, EventData> eventMap = new HashMap<>();
 
     @Override
-    public void initialize(URL location, ResourceBundle resources) {
-        // 初始化表格欄位
-        eventNameColumn.setCellValueFactory(new PropertyValueFactory<>("eventName"));
-        eventDateColumn.setCellValueFactory(new PropertyValueFactory<>("eventDate"));
-        eventTimeColumn.setCellValueFactory(new PropertyValueFactory<>("eventTime"));
-        locationColumn.setCellValueFactory(new PropertyValueFactory<>("location"));
-        organizerColumn.setCellValueFactory(new PropertyValueFactory<>("organizer"));
-        registrationDateColumn.setCellValueFactory(new PropertyValueFactory<>("registrationDate"));
-        statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
+    public void initialize(URL location, java.util.ResourceBundle resources) {
+        eventTitleColumn.setCellValueFactory(cell -> cell.getValue().eventTitleProperty());
+        locationColumn.setCellValueFactory(cell -> cell.getValue().locationProperty());
+        timeColumn.setCellValueFactory(cell -> cell.getValue().timeProperty());
+        organizerColumn.setCellValueFactory(cell -> cell.getValue().organizerProperty());
+        registrationTimeColumn.setCellValueFactory(cell -> cell.getValue().registrationTimeProperty());
+        statusColumn.setCellValueFactory(cell -> cell.getValue().statusProperty());
 
-        // 初始化資料
-        registrationData = FXCollections.observableArrayList();
         registrationTable.setItems(registrationData);
+    }
 
-        // 載入資料
+    // 主畫面切換頁面時會呼叫
+    public void setCurrentStudentId(String studentId) {
+        this.currentStudentId = studentId;
+        loadEventMap();
         loadRegistrationData();
-
-        System.out.println("查詢報名紀錄頁面已載入");
+        registrationTable.setItems(registrationData);
+        updateTotalLabel();
     }
 
-    /**
-     * 處理搜尋按鈕點擊事件
-     */
-    @FXML
-    private void handleSearch(ActionEvent event) {
-        String keyword = keywordField.getText().trim();
-        LocalDate selectedDate = eventDatePicker.getValue();
-
-        // 這裡應該實作搜尋邏輯
-        // 暫時顯示搜尋條件
-        String searchInfo = "搜尋條件 - ";
-        if (selectedDate != null) {
-            searchInfo += "日期: " + selectedDate + " ";
-        }
-        if (!keyword.isEmpty()) {
-            searchInfo += "關鍵字: " + keyword;
-        }
-
-        messageLabel.setText(searchInfo);
-
-        // TODO: 實作實際的搜尋功能
-        filterRegistrationData(keyword, selectedDate);
-    }
-
-    /**
-     * 處理顯示全部按鈕點擊事件
-     */
-    @FXML
-    private void handleShowAll(ActionEvent event) {
-        loadRegistrationData();
-        messageLabel.setText("顯示所有報名紀錄");
-    }
-
-    /**
-     * 處理重新整理按鈕點擊事件
-     */
-    @FXML
-    private void handleRefresh(ActionEvent event) {
-        loadRegistrationData();
-        messageLabel.setText("資料已重新整理");
-    }
-
-    /**
-     * 處理清除搜尋按鈕點擊事件
-     */
-    @FXML
-    private void handleClearSearch(ActionEvent event) {
-        keywordField.clear();
-        eventDatePicker.setValue(null);
-        messageLabel.setText("搜尋條件已清除");
-    }
-
-    /**
-     * 處理取消報名按鈕點擊事件
-     */
-    @FXML
-    private void handleCancelSelected(ActionEvent event) {
-        RegistrationRecord selected = registrationTable.getSelectionModel().getSelectedItem();
-        if (selected != null) {
-            // 確認對話框
-            Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
-            confirmAlert.setTitle("確認取消報名");
-            confirmAlert.setHeaderText("取消報名確認");
-            confirmAlert.setContentText("您確定要取消報名活動「" + selected.getEventName() + "」嗎？");
-
-            confirmAlert.showAndWait().ifPresent(response -> {
-                if (response == ButtonType.OK) {
-                    // 更新狀態為已取消
-                    selected.setStatus("已取消");
-                    registrationTable.refresh();
-                    showInfoAlert("取消報名", "取消成功", "已成功取消報名活動: " + selected.getEventName());
-                    messageLabel.setText("已取消報名: " + selected.getEventName());
+    // 讀取活動列表.csv 到 eventMap
+    private void loadEventMap() {
+        eventMap.clear();
+        try (BufferedReader reader = new BufferedReader(new FileReader(EVENT_CSV_PATH))) {
+            String line;
+            boolean firstLine = true;
+            while ((line = reader.readLine()) != null) {
+                if (firstLine) { firstLine = false; continue; }
+                String[] parts = line.split(",", -1);
+                if (parts.length >= 6) {
+                    String eventId = parts[0].trim();
+                    String title = parts[1].trim();
+                    String location = parts[2].trim();
+                    String time = parts[3].trim();
+                    String organizer = parts[4].trim();
+                    eventMap.put(eventId, new EventData(title, location, time, organizer));
                 }
-            });
-        } else {
-            showErrorAlert("錯誤", "未選擇活動", "請先選擇要取消報名的活動");
-        }
-    }
-
-    /**
-     * 處理返回按鈕點擊事件
-     */
-    @FXML
-    private void handleBack(ActionEvent event) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("學生主畫面.fxml"));
-            Parent root = loader.load();
-
-            Stage stage = (Stage) backButton.getScene().getWindow();
-            Scene scene = new Scene(root);
-            stage.setScene(scene);
-            stage.setTitle("學生主畫面");
-            stage.show();
-
+            }
         } catch (IOException e) {
             e.printStackTrace();
-            showErrorAlert("錯誤", "無法返回主畫面", e.getMessage());
         }
     }
 
-    /**
-     * 載入報名資料（示例資料）
-     */
+    // 讀取已報名.csv 並組合資料
     private void loadRegistrationData() {
         registrationData.clear();
-
-        // 添加示例資料
-        registrationData.add(new RegistrationRecord(
-                "程式設計競賽", "2024-03-15", "09:00",
-                "電腦教室A", "資訊系", "2024-03-01", "已報名"
-        ));
-        registrationData.add(new RegistrationRecord(
-                "校園音樂會", "2024-03-20", "19:00",
-                "演藝廳", "學務處", "2024-03-05", "已報名"
-        ));
-        registrationData.add(new RegistrationRecord(
-                "職涯講座", "2024-03-25", "14:00",
-                "國際會議廳", "職涯中心", "2024-03-10", "已報名"
-        ));
-
+        allData.clear();
+        if (currentStudentId == null) return;
+        try (BufferedReader reader = new BufferedReader(new FileReader(REG_CSV_PATH))) {
+            String line;
+            boolean firstLine = true;
+            while ((line = reader.readLine()) != null) {
+                if (firstLine) { firstLine = false; continue; }
+                String[] parts = line.split(",", -1);
+                if (parts.length >= 3) {
+                    String studentId = parts[0].trim();
+                    String eventId = parts[1].trim();
+                    String regTime = parts[2].trim();
+                    if (studentId.equals(currentStudentId) && eventMap.containsKey(eventId)) {
+                        EventData event = eventMap.get(eventId);
+                        RegistrationRecord record = new RegistrationRecord(
+                                event.getTitle(), event.getLocation(), event.getTime(), event.getOrganizer(), regTime, "已報名");
+                        registrationData.add(record);
+                        allData.add(record);
+                    }
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         updateTotalLabel();
     }
 
-    /**
-     * 過濾報名資料
-     */
-    private void filterRegistrationData(String keyword, LocalDate date) {
-        // TODO: 實作過濾邏輯
-        // 這裡應該根據關鍵字和日期過濾資料
-        updateTotalLabel();
-    }
-
-    /**
-     * 更新總計標籤
-     */
     private void updateTotalLabel() {
         totalLabel.setText("總計活動: " + registrationData.size() + " 項");
     }
 
-    /**
-     * 顯示錯誤警告對話框
-     */
-    private void showErrorAlert(String title, String header, String content) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle(title);
-        alert.setHeaderText(header);
-        alert.setContentText(content);
-        alert.showAndWait();
-    }
-
-    /**
-     * 顯示資訊對話框
-     */
-    private void showInfoAlert(String title, String header, String content) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle(title);
-        alert.setHeaderText(header);
-        alert.setContentText(content);
-        alert.showAndWait();
-    }
-
-    /**
-     * 報名紀錄資料類
-     */
-    public static class RegistrationRecord {
-        private String eventName;
-        private String eventDate;
-        private String eventTime;
-        private String location;
-        private String organizer;
-        private String registrationDate;
-        private String status;
-
-        public RegistrationRecord(String eventName, String eventDate, String eventTime,
-                                  String location, String organizer, String registrationDate, String status) {
-            this.eventName = eventName;
-            this.eventDate = eventDate;
-            this.eventTime = eventTime;
-            this.location = location;
-            this.organizer = organizer;
-            this.registrationDate = registrationDate;
-            this.status = status;
+    // 查詢功能（依關鍵字過濾）
+    @FXML
+    private void handleSearch(ActionEvent event) {
+        String keyword = (keywordField != null) ? keywordField.getText().trim().toLowerCase() : "";
+        registrationData.clear();
+        if (keyword.isEmpty()) {
+            registrationData.addAll(allData);
+        } else {
+            for (RegistrationRecord record : allData) {
+                if (record.getEventTitle().toLowerCase().contains(keyword)
+                        || record.getLocation().toLowerCase().contains(keyword)
+                        || record.getOrganizer().toLowerCase().contains(keyword)) {
+                    registrationData.add(record);
+                }
+            }
         }
+        updateTotalLabel();
+    }
 
-        // Getter 方法
-        public String getEventName() { return eventName; }
-        public String getEventDate() { return eventDate; }
-        public String getEventTime() { return eventTime; }
+    // 顯示全部
+    @FXML
+    private void handleShowAll(ActionEvent event) {
+        registrationData.setAll(allData);
+        if (keywordField != null) keywordField.clear();
+        updateTotalLabel();
+    }
+
+    // 重新整理
+    @FXML
+    private void handleRefresh(ActionEvent event) {
+        loadEventMap();
+        loadRegistrationData();
+        updateTotalLabel();
+        if (keywordField != null) keywordField.clear();
+    }
+
+    // 清除搜尋
+    @FXML
+    private void handleClearSearch(ActionEvent event) {
+        if (keywordField != null) keywordField.clear();
+        registrationData.setAll(allData);
+        updateTotalLabel();
+    }
+
+    @FXML
+    private void handleCancelSelected(ActionEvent event) {
+        RegistrationRecord selected = registrationTable.getSelectionModel().getSelectedItem();
+        if (selected == null) {
+            showAlert(Alert.AlertType.WARNING, "提醒", "請先選擇要取消的活動！");
+            return;
+        }
+        // 彈出確認對話框
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("確認取消");
+        alert.setHeaderText("你確定要取消這個報名嗎？");
+        alert.setContentText("活動名稱：" + selected.getEventTitle());
+        alert.showAndWait().ifPresent(result -> {
+            if (result == ButtonType.OK) {
+                // **1. 從 CSV 移除那一筆**
+                boolean removed = removeRecordFromCSV(selected);
+
+                // **2. 從畫面上移除**
+                registrationData.remove(selected);
+                allData.remove(selected);
+                updateTotalLabel();
+
+                if (removed) {
+                    showAlert(Alert.AlertType.INFORMATION, "已取消", "已成功取消報名！");
+                } else {
+                    showAlert(Alert.AlertType.WARNING, "提醒", "取消報名失敗（檔案內無此紀錄）");
+                }
+            }
+        });
+    }
+
+    // === 新增這個方法 ===
+    private boolean removeRecordFromCSV(RegistrationRecord record) {
+        File inputFile = new File(REG_CSV_PATH);
+        File tempFile = new File(REG_CSV_PATH + ".tmp");
+        boolean removed = false;
+
+        try (
+                BufferedReader reader = new BufferedReader(new FileReader(inputFile));
+                PrintWriter writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(tempFile), "UTF-8"))
+        ) {
+            String line;
+            boolean isFirstLine = true;
+            while ((line = reader.readLine()) != null) {
+                if (isFirstLine) {
+                    writer.println(line); // 保留標題
+                    isFirstLine = false;
+                    continue;
+                }
+                String[] parts = line.split(",", -1);
+                if (parts.length < 3) continue;
+                // 比對「學生ID + 活動名稱/編號 + 報名時間」是否完全相符
+                String studentId = parts[0].trim();
+                String eventId = parts[1].trim();
+                String regTime = parts[2].trim();
+                // eventMap 反查 eventId by eventTitle
+                String realEventId = null;
+                for (Map.Entry<String, EventData> entry : eventMap.entrySet()) {
+                    if (entry.getValue().getTitle().equals(record.getEventTitle())) {
+                        realEventId = entry.getKey();
+                        break;
+                    }
+                }
+                if (studentId.equals(currentStudentId)
+                        && eventId.equals(realEventId)
+                        && regTime.equals(record.getRegistrationTime())) {
+                    removed = true;
+                    continue; // 跳過這一筆（不寫入）
+                }
+                writer.println(line); // 其餘資料寫回
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+        // 覆蓋原檔
+        if (removed) {
+            if (!inputFile.delete() || !tempFile.renameTo(inputFile)) {
+                System.err.println("CSV 檔案取代失敗！");
+                return false;
+            }
+        } else {
+            tempFile.delete();
+        }
+        return removed;
+    }
+
+
+    @FXML
+    private void handleBack(javafx.event.ActionEvent event) {
+        // 返回上一頁邏輯，以下為基本寫法，可依你需求調整
+        try {
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("學生主畫面.fxml"));
+            javafx.scene.Parent root = loader.load();
+            javafx.stage.Stage stage = (javafx.stage.Stage) registrationTable.getScene().getWindow();
+            stage.setScene(new javafx.scene.Scene(root));
+            stage.setTitle("學生主畫面");
+            stage.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "錯誤", "無法返回主畫面！");
+        }
+    }
+
+    // 共用訊息提示方法
+    private void showAlert(Alert.AlertType type, String title, String content) {
+        Alert alert = new Alert(type);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(content);
+        alert.showAndWait();
+    }
+
+    // 內部 class：活動資料
+    private static class EventData {
+        private final String title, location, time, organizer;
+        public EventData(String title, String location, String time, String organizer) {
+            this.title = title;
+            this.location = location;
+            this.time = time;
+            this.organizer = organizer;
+        }
+        public String getTitle() { return title; }
         public String getLocation() { return location; }
+        public String getTime() { return time; }
         public String getOrganizer() { return organizer; }
-        public String getRegistrationDate() { return registrationDate; }
-        public String getStatus() { return status; }
+    }
 
-        // Setter 方法
-        public void setEventName(String eventName) { this.eventName = eventName; }
-        public void setEventDate(String eventDate) { this.eventDate = eventDate; }
-        public void setEventTime(String eventTime) { this.eventTime = eventTime; }
-        public void setLocation(String location) { this.location = location; }
-        public void setOrganizer(String organizer) { this.organizer = organizer; }
-        public void setRegistrationDate(String registrationDate) { this.registrationDate = registrationDate; }
-        public void setStatus(String status) { this.status = status; }
+    // 報名紀錄資料
+    public static class RegistrationRecord {
+        private final javafx.beans.property.SimpleStringProperty eventTitle;
+        private final javafx.beans.property.SimpleStringProperty location;
+        private final javafx.beans.property.SimpleStringProperty time;
+        private final javafx.beans.property.SimpleStringProperty organizer;
+        private final javafx.beans.property.SimpleStringProperty registrationTime;
+        private final javafx.beans.property.SimpleStringProperty status; // 新增
+
+        public RegistrationRecord(String eventTitle, String location, String time, String organizer, String registrationTime, String status) {
+            this.eventTitle = new javafx.beans.property.SimpleStringProperty(eventTitle);
+            this.location = new javafx.beans.property.SimpleStringProperty(location);
+            this.time = new javafx.beans.property.SimpleStringProperty(time);
+            this.organizer = new javafx.beans.property.SimpleStringProperty(organizer);
+            this.registrationTime = new javafx.beans.property.SimpleStringProperty(registrationTime);
+            this.status = new javafx.beans.property.SimpleStringProperty(status); // 新增
+        }
+        public javafx.beans.property.StringProperty eventTitleProperty() { return eventTitle; }
+        public javafx.beans.property.StringProperty locationProperty() { return location; }
+        public javafx.beans.property.StringProperty timeProperty() { return time; }
+        public javafx.beans.property.StringProperty organizerProperty() { return organizer; }
+        public javafx.beans.property.StringProperty registrationTimeProperty() { return registrationTime; }
+        public javafx.beans.property.StringProperty statusProperty() { return status; } // 新增
+
+        public String getEventTitle() { return eventTitle.get(); }
+        public String getLocation() { return location.get(); }
+        public String getTime() { return time.get(); }
+        public String getOrganizer() { return organizer.get(); }
+        public String getRegistrationTime() { return registrationTime.get(); }
+        public String getStatus() { return status.get(); }
     }
 }
