@@ -2,6 +2,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -92,6 +93,38 @@ public class StudentMainController implements Initializable {
             e.printStackTrace();
             showErrorAlert("錯誤", "無法載入報名活動頁面", e.getMessage());
         }
+    }
+
+    // 在學生主畫面控制器中，當點擊「查詢報名紀錄」按鈕時：
+
+    @FXML
+    private void handleViewRegistrationRecords(ActionEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("報名紀錄查詢.fxml"));
+            Parent root = loader.load();
+
+            // 取得控制器並設定當前學生ID
+            RegistrationRecordController controller = loader.getController();
+            controller.setCurrentStudentId(currentStudentId); // currentStudentId 是當前登入的學生ID
+
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
+            stage.setTitle("報名紀錄查詢");
+            stage.show();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            showErrorAlert("錯誤", "無法開啟報名紀錄頁面", e.getMessage());
+        }
+    }
+
+    // 假設您的學生主畫面控制器有一個設定當前學生的方法：
+    private String currentStudentId;
+
+    public void setCurrentStudent(String studentId) {
+        this.currentStudentId = studentId;
+        // 其他初始化邏輯...
     }
 
     /**
