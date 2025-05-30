@@ -15,6 +15,9 @@ import java.util.ResourceBundle;
 
 public class StudentMainController implements Initializable {
 
+    // 新增：靜態變數保存當前登入的學生資訊
+    private static Student currentLoggedInStudent;
+
     private Student student;
 
     @FXML
@@ -24,16 +27,48 @@ public class StudentMainController implements Initializable {
     private Button registerEventsButton;
 
     @FXML
-    private Button logoutButton;           // 登出按鈕
+    private Button logoutButton;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         System.out.println("學生主畫面已載入");
+
+        // 如果本地 student 為空，嘗試從靜態變數恢復
+        if (student == null && currentLoggedInStudent != null) {
+            student = currentLoggedInStudent;
+        }
     }
 
-    // 只保留這一個正確的 setStudent(Student)
+    // 新增：靜態方法設定當前登入學生
+    public static void setCurrentLoggedInStudent(Student student) {
+        currentLoggedInStudent = student;
+    }
+
+    // 新增：靜態方法獲取當前登入學生
+    public static Student getCurrentLoggedInStudent() {
+        return currentLoggedInStudent;
+    }
+
+    // 新增：靜態方法清除登入資訊
+    public static void clearLoggedInStudent() {
+        currentLoggedInStudent = null;
+    }
+
     public void setStudent(Student student) {
         this.student = student;
+        // 同時保存到靜態變數
+        currentLoggedInStudent = student;
+    }
+
+    /**
+     * 獲取當前學生（優先使用靜態變數）
+     */
+    private Student getCurrentStudent() {
+        // 優先使用靜態變數中的資訊
+        if (currentLoggedInStudent != null) {
+            return currentLoggedInStudent;
+        }
+        return student;
     }
 
     /**
@@ -41,8 +76,10 @@ public class StudentMainController implements Initializable {
      */
     @FXML
     private void handleBrowseEvents(ActionEvent event) {
-        if (student == null) {
+        Student currentStudent = getCurrentStudent();
+        if (currentStudent == null) {
             showErrorAlert("錯誤", "學生資訊遺失", "請重新登入！");
+            handleLogout();
             return;
         }
 
@@ -52,7 +89,7 @@ public class StudentMainController implements Initializable {
 
             // 取得 EventBrowserController 並設定學生資訊
             EventBrowserController eventController = loader.getController();
-            eventController.setCurrentStudent(student); // 傳遞學生物件
+            eventController.setCurrentStudent(currentStudent);
 
             Stage stage = (Stage) browseEventsButton.getScene().getWindow();
             Scene scene = new Scene(root, 800, 500);
@@ -69,8 +106,10 @@ public class StudentMainController implements Initializable {
      */
     @FXML
     private void handleRegisterEvents(ActionEvent event) {
-        if (student == null) {
+        Student currentStudent = getCurrentStudent();
+        if (currentStudent == null) {
             showErrorAlert("錯誤", "學生資訊遺失", "請重新登入！");
+            handleLogout();
             return;
         }
 
@@ -80,7 +119,7 @@ public class StudentMainController implements Initializable {
 
             // 取得 RegistrationRecordController 並傳遞學生ID
             RegistrationRecordController controller = loader.getController();
-            controller.setCurrentStudentId(student.getId());
+            controller.setCurrentStudentId(currentStudent.getId());
 
             Stage stage = (Stage) registerEventsButton.getScene().getWindow();
             Scene scene = new Scene(root);
@@ -100,6 +139,9 @@ public class StudentMainController implements Initializable {
     @FXML
     private void handleLogout() {
         try {
+            // 清除靜態變數中的學生資訊
+            clearLoggedInStudent();
+
             // 回到登入畫面
             Parent root = FXMLLoader.load(getClass().getResource("/login.fxml"));
             Stage stage = (Stage) logoutButton.getScene().getWindow();
@@ -139,7 +181,7 @@ public class StudentMainController implements Initializable {
     }
 
     /**
-     * 返回主選單（如果需要的話）
+     * 返回主選單
      */
     public void returnToMainMenu() {
         try {
