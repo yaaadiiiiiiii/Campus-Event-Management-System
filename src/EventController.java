@@ -52,7 +52,7 @@ public class EventController implements Initializable {
             "../活動列表.csv"                 // 上一層目錄
     };
 
-    private final String usersPath = "/users.csv";
+    private final String usersPath = "src/users.csv";
 
     public void setCurrentOrganizer(Organizer organizer) {
         this.currentOrganizer = organizer;
