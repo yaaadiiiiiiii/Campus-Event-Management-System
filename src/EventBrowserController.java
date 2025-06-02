@@ -16,6 +16,8 @@ import model.Student;
 
 import java.io.*;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.ResourceBundle;
 
 public class EventBrowserController implements Initializable {
@@ -36,6 +38,9 @@ public class EventBrowserController implements Initializable {
     private ObservableList<Event> eventList = FXCollections.observableArrayList();
     private ObservableList<Event> filteredEventList = FXCollections.observableArrayList();
 
+    // 新增：用於存儲用戶ID到姓名的映射
+    private Map<String, String> userIdToNameMap = new HashMap<>();
+
     public void setCurrentStudent(Student student) {
         this.currentStudent = student;
         this.currentStudentId = student.getId();
@@ -47,9 +52,42 @@ public class EventBrowserController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        loadUserData(); // 新增：載入用戶資料
         setupTableColumns();
         reloadEvents();
         eventTable.setItems(filteredEventList);
+    }
+
+    // 新增：載入用戶資料的方法
+    private void loadUserData() {
+        userIdToNameMap.clear();
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader("src/users.csv"));
+            String line;
+            boolean isFirstLine = true;
+            while ((line = reader.readLine()) != null) {
+                if (isFirstLine) {
+                    isFirstLine = false;
+                    continue;
+                }
+                String[] parts = line.split(",", -1);
+                if (parts.length >= 2) {
+                    String userId = parts[0].trim();
+                    String userName = parts[1].trim();
+                    userIdToNameMap.put(userId, userName);
+                }
+            }
+            reader.close();
+            System.out.println("成功載入 " + userIdToNameMap.size() + " 個用戶資料");
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("讀取用戶資料時發生錯誤: " + e.getMessage());
+        }
+    }
+
+    // 新增：根據用戶ID獲取姓名的方法
+    private String getOrganizerName(String organizerId) {
+        return userIdToNameMap.getOrDefault(organizerId, organizerId); // 如果找不到對應姓名，返回原ID
     }
 
     private void setupTableColumns() {
@@ -132,14 +170,16 @@ public class EventBrowserController implements Initializable {
                     String eventName = parts[1].trim();
                     String location = parts[2].trim();
                     String time = parts[3].trim();
-                    String organizer = parts[4].trim();
+                    String organizerId = parts[4].trim(); // 這是主辦單位ID
+                    String organizerName = getOrganizerName(organizerId); // 轉換為姓名
                     int remainingCapacity = 0;
                     try {
                         remainingCapacity = Integer.parseInt(parts[5].trim());
                     } catch (NumberFormatException e) {
                         remainingCapacity = 0;
                     }
-                    Event event = new Event(eventId, eventName, location, time, organizer, remainingCapacity);
+                    // 使用主辦人姓名而不是ID創建Event物件
+                    Event event = new Event(eventId, eventName, location, time, organizerName, remainingCapacity);
                     eventList.add(event);
                 }
             }

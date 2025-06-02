@@ -31,8 +31,10 @@ public class RegistrationRecordController implements Initializable {
 
     private static final String EVENT_CSV_PATH = "src/活動列表.csv";
     private static final String REG_CSV_PATH = "src/已報名.csv";
+    private static final String USERS_CSV_PATH = "src/users.csv"; // 新增：用戶資料路徑
 
     private Map<String, EventData> eventMap = new HashMap<>();
+    private Map<String, String> userIdToNameMap = new HashMap<>(); // 新增：用戶ID到姓名的映射
 
     @Override
     public void initialize(URL location, java.util.ResourceBundle resources) {
@@ -49,10 +51,41 @@ public class RegistrationRecordController implements Initializable {
     // 主畫面切換頁面時會呼叫
     public void setCurrentStudentId(String studentId) {
         this.currentStudentId = studentId;
+        loadUserData(); // 新增：載入用戶資料
         loadEventMap();
         loadRegistrationData();
         registrationTable.setItems(registrationData);
         updateTotalLabel();
+    }
+
+    // 新增：載入用戶資料的方法
+    private void loadUserData() {
+        userIdToNameMap.clear();
+        try (BufferedReader reader = new BufferedReader(new FileReader(USERS_CSV_PATH))) {
+            String line;
+            boolean isFirstLine = true;
+            while ((line = reader.readLine()) != null) {
+                if (isFirstLine) {
+                    isFirstLine = false;
+                    continue;
+                }
+                String[] parts = line.split(",", -1);
+                if (parts.length >= 2) {
+                    String userId = parts[0].trim();
+                    String userName = parts[1].trim();
+                    userIdToNameMap.put(userId, userName);
+                }
+            }
+            System.out.println("成功載入 " + userIdToNameMap.size() + " 個用戶資料");
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("讀取用戶資料時發生錯誤: " + e.getMessage());
+        }
+    }
+
+    // 新增：根據用戶ID獲取姓名的方法
+    private String getOrganizerName(String organizerId) {
+        return userIdToNameMap.getOrDefault(organizerId, organizerId); // 如果找不到對應姓名，返回原ID
     }
 
     // 讀取活動列表.csv 到 eventMap
@@ -69,8 +102,9 @@ public class RegistrationRecordController implements Initializable {
                     String title = parts[1].trim();
                     String location = parts[2].trim();
                     String time = parts[3].trim();
-                    String organizer = parts[4].trim();
-                    eventMap.put(eventId, new EventData(title, location, time, organizer));
+                    String organizerId = parts[4].trim(); // 這是主辦單位ID
+                    String organizerName = getOrganizerName(organizerId); // 轉換為姓名
+                    eventMap.put(eventId, new EventData(title, location, time, organizerName)); // 使用姓名
                 }
             }
         } catch (IOException e) {
@@ -142,6 +176,7 @@ public class RegistrationRecordController implements Initializable {
     // 重新整理
     @FXML
     private void handleRefresh(ActionEvent event) {
+        loadUserData(); // 新增：重新載入用戶資料
         loadEventMap();
         loadRegistrationData();
         updateTotalLabel();
