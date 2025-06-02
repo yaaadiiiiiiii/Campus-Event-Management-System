@@ -32,6 +32,7 @@ public class RegistrationListController implements Initializable {
     @FXML private TableColumn<Registration, String> studentIdColumn;
     @FXML private TableColumn<Registration, String> studentNameColumn;
     @FXML private TableColumn<Registration, String> registrationTimeColumn;
+    @FXML private TableColumn<Registration, String> eventNameColumn;
     @FXML private Button exportButton;
     @FXML private Button refreshButton;
     @FXML private Button deleteButton;
@@ -70,6 +71,7 @@ public class RegistrationListController implements Initializable {
         studentIdColumn.setCellValueFactory(new PropertyValueFactory<>("studentId"));
         studentNameColumn.setCellValueFactory(new PropertyValueFactory<>("studentName"));
         registrationTimeColumn.setCellValueFactory(new PropertyValueFactory<>("registrationTime"));
+        eventNameColumn.setCellValueFactory(new PropertyValueFactory<>("eventName"));
     }
 
     private void loadUserData() {
@@ -312,7 +314,7 @@ public class RegistrationListController implements Initializable {
             writer.write('\uFEFF');
 
             // 寫入標題行
-            writer.write("序號,學號,姓名,活動名稱,報名時間\n");
+            writer.write("序號,學號,姓名,報名時間,活動名稱\n");
 
             // 寫入資料
             int sequence = 1;
@@ -321,8 +323,8 @@ public class RegistrationListController implements Initializable {
                         sequence++,
                         registration.getStudentId(),
                         registration.getStudentName(),
-                        registration.getEventName(),
-                        registration.getRegistrationTime()
+                        registration.getRegistrationTime(),
+                        registration.getEventName()
                 ));
             }
         }
@@ -347,28 +349,6 @@ public class RegistrationListController implements Initializable {
 
         showInfoAlert("重新整理", "資料已更新");
     }
-
-//    @FXML
-//    private void handleDeleteRegistration() {
-//        Registration selected = registrationTable.getSelectionModel().getSelectedItem();
-//        if (selected == null) {
-//            showWarningAlert("請選擇要取消的報名記錄");
-//            return;
-//        }
-//
-//        Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
-//        confirmAlert.setTitle("確認取消報名");
-//        confirmAlert.setHeaderText("確定要取消以下報名記錄嗎？");
-//        confirmAlert.setContentText("學生：" + selected.getStudentName() +
-//                "\n活動：" + selected.getEventName());
-//
-//        if (confirmAlert.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK) {
-//            allRegistrations.remove(selected);
-//            filteredRegistrations.remove(selected);
-//            updateStatistics();
-//            showInfoAlert("取消成功", "已成功取消該學生的報名記錄");
-//        }
-//    }
 
     @FXML
     private void handleBackToMain() {
