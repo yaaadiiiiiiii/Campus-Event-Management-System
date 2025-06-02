@@ -31,39 +31,60 @@ public class EventController implements Initializable {
     @FXML private Button addButton;
     @FXML private Button refreshButton;
     @FXML private Button backButton;
-    @FXML private Button importButton; // 新增導入按鈕
-    @FXML private Button exportButton; // 新增匯出按鈕
-    @FXML private TextField searchField; // 新增搜尋欄位
-    @FXML private Button searchButton; // 新增搜尋按鈕
+    @FXML private Button importButton;
+    @FXML private Button exportButton;
+    @FXML private TextField searchField;
+    @FXML private Button searchButton;
 
     private ObservableList<Event> eventList = FXCollections.observableArrayList();
     private ObservableList<Event> filteredEventList = FXCollections.observableArrayList();
     private Organizer currentOrganizer;
+
+    // 靜態變數來保存當前使用者資訊，避免在畫面切換時遺失
+    private static Organizer globalCurrentOrganizer;
 
     // 用户ID到名称的映射
     private Map<String, String> userIdToNameMap = new HashMap<>();
 
     // CSV檔案路徑 - 支援多種路徑
     private final String[] csvPaths = {
-            "活動列表.csv",                    // 當前工作目錄
-            "src/活動列表.csv",               // src 目錄下
-            "src/main/resources/活動列表.csv", // resources 目錄下
-            "./活動列表.csv",                 // 明確指定當前目錄
-            "../活動列表.csv"                 // 上一層目錄
+            "活動列表.csv",
+            "src/活動列表.csv",
+            "src/main/resources/活動列表.csv",
+            "./活動列表.csv",
+            "../活動列表.csv"
     };
 
     private final String usersPath = "src/users.csv";
 
     public void setCurrentOrganizer(Organizer organizer) {
         this.currentOrganizer = organizer;
+        globalCurrentOrganizer = organizer; // 同時設置靜態變數
+        System.out.println("設置當前主辦人：" + (organizer != null ? organizer.getName() : "null"));
         loadUserIdToNameMapping();
         loadEventsFromCSV();
+    }
+
+    // 新增：獲取當前主辦人的靜態方法
+    public static Organizer getGlobalCurrentOrganizer() {
+        return globalCurrentOrganizer;
+    }
+
+    // 新增：設置全域當前主辦人的靜態方法
+    public static void setGlobalCurrentOrganizer(Organizer organizer) {
+        globalCurrentOrganizer = organizer;
     }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         setupTableColumns();
         eventTable.setItems(filteredEventList);
+
+        // 如果當前主辦人為空，嘗試從靜態變數恢復
+        if (currentOrganizer == null && globalCurrentOrganizer != null) {
+            System.out.println("從靜態變數恢復當前主辦人：" + globalCurrentOrganizer.getName());
+            setCurrentOrganizer(globalCurrentOrganizer);
+        }
 
         // 初始化搜尋功能
         if (searchField != null) {
@@ -72,6 +93,8 @@ public class EventController implements Initializable {
             });
         }
     }
+
+
 
     private void setupTableColumns() {
         titleColumn.setCellValueFactory(new PropertyValueFactory<>("title"));
@@ -93,13 +116,11 @@ public class EventController implements Initializable {
 
                             private final Button editBtn = new Button("編輯");
                             private final Button deleteBtn = new Button("刪除");
-                            private final Button copyBtn = new Button("複製"); // 新增複製按鈕
-                            private final HBox hbox = new HBox(editBtn, deleteBtn, copyBtn);
+                            private final HBox hbox = new HBox(editBtn, deleteBtn);
 
                             {
                                 editBtn.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white;");
                                 deleteBtn.setStyle("-fx-background-color: #f44336; -fx-text-fill: white;");
-                                copyBtn.setStyle("-fx-background-color: #2196F3; -fx-text-fill: white;");
                                 hbox.setSpacing(5);
 
                                 editBtn.setOnAction(event -> {
@@ -110,11 +131,6 @@ public class EventController implements Initializable {
                                 deleteBtn.setOnAction(event -> {
                                     Event selectedEvent = getTableView().getItems().get(getIndex());
                                     handleDeleteEvent(selectedEvent);
-                                });
-
-                                copyBtn.setOnAction(event -> {
-                                    Event selectedEvent = getTableView().getItems().get(getIndex());
-                                    handleCopyEvent(selectedEvent);
                                 });
                             }
 
@@ -216,6 +232,12 @@ public class EventController implements Initializable {
 
     @FXML
     private void handleAddEvent() {
+        // 確保有當前主辦人
+        if (currentOrganizer == null) {
+            showAlert("錯誤", "無法識別當前使用者，請重新登入", Alert.AlertType.ERROR);
+            return;
+        }
+
         EventDialog dialog = new EventDialog(null, currentOrganizer);
         Optional<Event> result = dialog.showAndWait();
 
@@ -266,26 +288,6 @@ public class EventController implements Initializable {
     }
 
     /**
-     * 複製活動功能
-     */
-    private void handleCopyEvent(Event event) {
-        String eventId = generateEventId();
-        Event copiedEvent = new Event(
-                eventId,
-                event.getTitle() + " (副本)",
-                event.getLocation(),
-                event.getTime(),
-                event.getCapacity(),
-                event.getOrganizer()
-        );
-
-        eventList.add(copiedEvent);
-        filteredEventList.add(copiedEvent);
-        saveEventsToCSV();
-        showAlert("成功", "活動已成功複製！", Alert.AlertType.INFORMATION);
-    }
-
-    /**
      * 導入CSV檔案
      */
     @FXML
@@ -333,6 +335,11 @@ public class EventController implements Initializable {
         System.out.println("當前主辦人：" + (currentOrganizer != null ?
                 currentOrganizer.getId() + " (" + currentOrganizer.getName() + ")" : "null"));
 
+        // 確保有當前主辦人
+        if (currentOrganizer == null && globalCurrentOrganizer != null) {
+            currentOrganizer = globalCurrentOrganizer;
+        }
+
         loadUserIdToNameMapping();
         loadEventsFromCSV();
         eventTable.refresh();
@@ -365,6 +372,7 @@ public class EventController implements Initializable {
         }
     }
 
+    // 其餘方法保持不變...
     private String generateEventId() {
         Set<String> existingIds = new HashSet<>();
 
@@ -388,9 +396,6 @@ public class EventController implements Initializable {
         return newId;
     }
 
-    /**
-     * 從CSV檔案載入活動資料（改進版）
-     */
     private void loadEventsFromCSV() {
         if (currentOrganizer == null) {
             System.out.println("警告：當前主辦人為空，無法載入活動");
@@ -452,9 +457,6 @@ public class EventController implements Initializable {
         loadEventsFromCSV();
     }
 
-    /**
-     * 從指定檔案導入活動
-     */
     private void importEventsFromCSV(File file) {
         try (BufferedReader br = new BufferedReader(
                 new InputStreamReader(new FileInputStream(file), "UTF-8"))) {
@@ -527,9 +529,6 @@ public class EventController implements Initializable {
         }
     }
 
-    /**
-     * 匯出活動到指定檔案
-     */
     private void exportEventsToCSV(File file) {
         try (BufferedWriter bw = new BufferedWriter(
                 new OutputStreamWriter(new FileOutputStream(file), "UTF-8"))) {
@@ -559,16 +558,10 @@ public class EventController implements Initializable {
         }
     }
 
-    /**
-     * 檢查活動ID是否已存在
-     */
     private boolean isEventIdExists(String id) {
         return eventList.stream().anyMatch(event -> id.equals(event.getId()));
     }
 
-    /**
-     * 創建空的CSV檔案
-     */
     private void createEmptyCSV() {
         try {
             String defaultPath = "活動列表.csv";
@@ -598,22 +591,15 @@ public class EventController implements Initializable {
 
         while ((line = br.readLine()) != null) {
             lineNumber++;
-            System.out.println("讀取第 " + lineNumber + " 行：" + line);
 
             if (firstLine) {
                 firstLine = false;
-                System.out.println("CSV 標題行：" + line);
                 continue;
             }
 
             String[] tokens = line.split(",", -1);
-            System.out.println("分割後欄位數量：" + tokens.length);
 
-            for (int i = 0; i < tokens.length; i++) {
-                System.out.println("  欄位 " + i + "：'" + tokens[i].trim() + "'");
-            }
-
-            if (tokens.length >= 5) { // 至少需要5個欄位
+            if (tokens.length >= 5) {
                 try {
                     String id = tokens[0].trim();
                     String title = tokens[1].trim();
@@ -622,26 +608,15 @@ public class EventController implements Initializable {
                     String organizerInfo = tokens[4].trim();
                     int capacity = tokens.length > 5 ? Integer.parseInt(tokens[5].trim()) : 0;
 
-                    System.out.println("解析結果：");
-                    System.out.println("  ID：" + id);
-                    System.out.println("  標題：" + title);
-                    System.out.println("  地點：" + location);
-                    System.out.println("  時間：" + time);
-                    System.out.println("  主辦人資訊：" + organizerInfo);
-                    System.out.println("  容量：" + capacity);
-
                     if (title.isEmpty()) {
-                        System.out.println("警告：活動標題為空，跳過此筆資料 (第" + lineNumber + "行)");
                         continue;
                     }
 
                     // 處理主辦人資訊
                     Organizer organizer;
                     String organizerName = getUserNameById(organizerInfo);
-                    System.out.println("主辦人名稱對應：" + organizerInfo + " -> " + organizerName);
 
                     if (organizerName.equals(organizerInfo)) {
-                        // 如果找不到對應的名稱，可能直接儲存的是名稱
                         organizerName = organizerInfo;
                     }
 
@@ -652,46 +627,30 @@ public class EventController implements Initializable {
                     if (currentOrganizer != null) {
                         shouldLoad = organizerInfo.equals(currentOrganizer.getId()) ||
                                 organizerInfo.equals(currentOrganizer.getName());
-                        System.out.println("主辦人匹配檢查：");
-                        System.out.println("  CSV中的主辦人：" + organizerInfo);
-                        System.out.println("  當前主辦人ID：" + currentOrganizer.getId());
-                        System.out.println("  當前主辦人名稱：" + currentOrganizer.getName());
-                        System.out.println("  是否匹配：" + shouldLoad);
                     } else {
-                        shouldLoad = true; // 如果沒有指定主辦人，載入所有活動
-                        System.out.println("沒有指定當前主辦人，載入所有活動");
+                        shouldLoad = true;
                     }
 
                     if (shouldLoad) {
                         Event event = new Event(id, title, location, time, capacity, organizer);
                         eventList.add(event);
                         loadedCount++;
-                        System.out.println("✓ 成功載入活動：" + title + "，主辦人：" + organizerName);
-                    } else {
-                        System.out.println("✗ 跳過活動（主辦人不匹配）：" + title);
                     }
 
                 } catch (NumberFormatException e) {
-                    System.out.println("解析數字時發生錯誤 (第" + lineNumber + "行)：" + line + ", 錯誤：" + e.getMessage());
+                    System.out.println("解析數字時發生錯誤 (第" + lineNumber + "行)");
                 }
-            } else {
-                System.out.println("資料格式不正確 (第" + lineNumber + "行，欄位數量: " + tokens.length + ")：" + line);
             }
         }
 
         System.out.println("=== CSV 載入完成 ===");
-        System.out.println("總共讀取 " + (lineNumber - 1) + " 行資料");
         System.out.println("成功載入 " + loadedCount + " 個活動");
-        System.out.println("當前 eventList 大小：" + eventList.size());
     }
 
-    /**
-     * 儲存活動到CSV檔案
-     */
     private void saveEventsToCSV() {
         String csvPath = findExistingCSVPath();
         if (csvPath == null) {
-            csvPath = "活動列表.csv"; // 預設路徑
+            csvPath = "活動列表.csv";
         }
 
         try (BufferedWriter bw = new BufferedWriter(
@@ -727,9 +686,6 @@ public class EventController implements Initializable {
         }
     }
 
-    /**
-     * 尋找現有的CSV檔案路徑
-     */
     private String findExistingCSVPath() {
         for (String path : csvPaths) {
             File file = new File(path);
