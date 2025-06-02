@@ -43,7 +43,7 @@ public class EventController implements Initializable {
     // 靜態變數來保存當前使用者資訊，避免在畫面切換時遺失
     private static Organizer globalCurrentOrganizer;
 
-    // 用户ID到名称的映射
+    // 用户ID到名稱的映射
     private Map<String, String> userIdToNameMap = new HashMap<>();
 
     // CSV檔案路徑 - 支援多種路徑
@@ -100,7 +100,7 @@ public class EventController implements Initializable {
         titleColumn.setCellValueFactory(new PropertyValueFactory<>("title"));
         locationColumn.setCellValueFactory(new PropertyValueFactory<>("location"));
         timeColumn.setCellValueFactory(new PropertyValueFactory<>("time"));
-        // 显示主办单位名称而不是ID
+        // 顯示主辦單位名稱而非ID
         organizerColumn.setCellValueFactory(cellData ->
                 new ReadOnlyStringWrapper(cellData.getValue().getOrganizer().getName()));
         capacityColumn.setCellValueFactory(new PropertyValueFactory<>("capacity"));
@@ -179,7 +179,7 @@ public class EventController implements Initializable {
     }
 
     /**
-     * 加载用户ID到名称的映射
+     * 載入用戶ID到名稱的對應表
      */
     private void loadUserIdToNameMapping() {
         userIdToNameMap.clear();
@@ -224,7 +224,7 @@ public class EventController implements Initializable {
     }
 
     /**
-     * 根据用户ID获取用户名称
+     * 根據用戶ID取得用戶名稱
      */
     private String getUserNameById(String userId) {
         return userIdToNameMap.getOrDefault(userId, userId);
