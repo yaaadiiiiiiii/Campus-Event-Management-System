@@ -15,6 +15,7 @@ public class HostMainController {
     private Organizer organizer;
 
     @FXML private Button eventManagementButton;  // 活動管理按鈕
+    @FXML private Button registrationListButton; // 修正：改為正確的按鈕名稱
     @FXML private Button logoutButton;           // 登出按鈕
     @FXML private Label welcomeLabel;            // 歡迎標籤（可選）
 
@@ -57,6 +58,29 @@ public class HostMainController {
             System.err.println("無法載入活動管理畫面：" + e.getMessage());
             e.printStackTrace();
             showAlert(Alert.AlertType.ERROR, "載入失敗", "無法開啟活動管理畫面，請稍後再試。");
+        }
+    }
+
+    // 處理報名名單查詢按鈕點擊
+    @FXML
+    private void handleRegistrationList() {
+        try {
+            // 載入報名名單查詢的 FXML 檔案
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/報名名單查詢.fxml"));
+            Parent root = loader.load();
+
+            // 獲取當前窗口
+            Stage stage = (Stage) registrationListButton.getScene().getWindow();
+
+            // 設置新場景
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
+            stage.setTitle("報名名單查詢");
+            stage.show();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "載入失敗", "無法開啟報名名單查詢畫面，請稍後再試。");
         }
     }
 

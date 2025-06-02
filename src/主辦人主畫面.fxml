@@ -30,7 +30,7 @@
             </Button>
 
             <!-- 報名管理按鈕 -->
-            <Button prefHeight="50.0" prefWidth="200.0" style="-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-size: 16px;" text="報名名單查詢">
+            <Button fx:id="registrationListButton" onAction="#handleRegistrationList" prefHeight="50.0" prefWidth="200.0" style="-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-size: 16px;" text="報名名單查詢">
             </Button>
 
             <!-- 登出按鈕 -->
