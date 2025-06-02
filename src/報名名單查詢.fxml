@@ -64,10 +64,11 @@
         <!-- 報名名單表格 -->
         <TableView fx:id="registrationTable" layoutX="50.0" layoutY="170.0" prefHeight="350.0" prefWidth="800.0">
             <columns>
-                <TableColumn fx:id="sequenceColumn" prefWidth="100.0" text="序號" />
-                <TableColumn fx:id="studentIdColumn" prefWidth="211.0" text="學號" />
-                <TableColumn fx:id="studentNameColumn" prefWidth="251.0" text="姓名" />
-                <TableColumn fx:id="registrationTimeColumn" prefWidth="237.0" text="報名時間" />
+                <TableColumn fx:id="sequenceColumn" prefWidth="80.0" text="序號" />
+                <TableColumn fx:id="studentIdColumn" prefWidth="103.0" text="學號" />
+                <TableColumn fx:id="studentNameColumn" prefWidth="104.0" text="姓名" />
+                <TableColumn fx:id="registrationTimeColumn" prefWidth="259.0" text="報名時間" />
+                <TableColumn fx:id="eventNameColumn" prefWidth="253.0" text="活動名稱" />
             </columns>
         </TableView>
 
@@ -76,7 +77,7 @@
             <children>
                 <Button fx:id="exportButton" onAction="#handleExport" prefHeight="30.0" prefWidth="100.0" style="-fx-background-color: #4CAF50; -fx-text-fill: white;" text="匯出Excel" />
                 <Button fx:id="refreshButton" onAction="#handleRefresh" prefHeight="30.0" prefWidth="80.0" style="-fx-background-color: #FF9800; -fx-text-fill: white;" text="重新整理" />
-<!--                <Button fx:id="deleteButton" onAction="#handleDeleteRegistration" prefHeight="30.0" prefWidth="100.0" style="-fx-background-color: #f44336; -fx-text-fill: white;" text="取消報名" />-->
+                <!--                <Button fx:id="deleteButton" onAction="#handleDeleteRegistration" prefHeight="30.0" prefWidth="100.0" style="-fx-background-color: #f44336; -fx-text-fill: white;" text="取消報名" />-->
             </children>
         </HBox>
 
